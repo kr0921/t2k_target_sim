@@ -1,0 +1,4 @@
+build/
+log/
+*.root
+run_v*.mac

@@ -1,0 +1,29 @@
+# Macro file for T2K simualtions
+#
+# To be run preferably in batch, without graphics:
+# % T2K_sim run2.mac
+#
+#/run/numberOfWorkers 4
+/run/initialize
+
+#/tracking/verbose 4
+
+#
+#  turn off randomization
+#
+/gun/particle proton
+/gun/direction 0 0 1 # momentum direction
+/gun/position 0 0 0 mm  # starting position
+/gun/number   1      # number of particles
+
+/gun/energy 30 GeV
+/T2K/generator/randomizePrimary FALSE
+/T2K/generator/sigmaMomentum 0.
+/T2K/generator/sigmaAngle 0.
+/run/verbose 1
+/run/printProgress 1
+
+/analysis/setFileName T2K_target_sim
+/run/beamOn 30
+
+

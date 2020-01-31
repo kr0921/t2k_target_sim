@@ -1,0 +1,21 @@
+image: bars21/dev_hep_geant:latest
+
+build:
+  stage: build
+  before_script:
+    - source $COMMON_INSTALL_PREFIX/usr/setup.sh
+  script:
+    - mkdir build; cd build
+    - cmake ../
+    - make -j3
+  artifacts:
+    paths:
+    - ./build/T2K_target_sim
+
+# run tests using the binary built before
+Run_test:
+  stage: test
+  before_script:
+    - source $COMMON_INSTALL_PREFIX/usr/setup.sh
+  script:
+    - ./build/T2K_target_sim run.mac
