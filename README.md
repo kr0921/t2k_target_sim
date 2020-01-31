@@ -8,7 +8,7 @@ Neutral particle production points
 output_root_file.root:
 
     |-- TTree T2K_neutral   # contains the information about neutral particles production
-        |-- ekin        # momentum [MeV]
+        |-- mom         # momentum [MeV]
         |-- pid         # PDG code
         |-- dir_x       # direction x
         |-- dir_y       # direction y
