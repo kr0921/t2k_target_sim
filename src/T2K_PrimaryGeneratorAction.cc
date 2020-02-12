@@ -47,7 +47,8 @@ T2K_PrimaryGeneratorAction::T2K_PrimaryGeneratorAction()
   fMomentum(1000.*MeV),
   fSigmaMomentum(50.*MeV),
   fSigmaAngle(2.*deg),
-  fRandomizePrimary(true)
+  fRandomizePrimary(true), 
+  fT2KGenerator(false)
 {
   G4int nofParticles = 1;
   fParticleGun  = new G4ParticleGun(nofParticles);
@@ -79,6 +80,12 @@ T2K_PrimaryGeneratorAction::~T2K_PrimaryGeneratorAction()
 
 void T2K_PrimaryGeneratorAction::GeneratePrimaries(G4Event* event)
 {
+  
+  if (!fT2KGenerator){
+     fParticleGun->GeneratePrimaryVertex(event);
+     return;
+  }
+  
   G4ParticleDefinition* particle;
   if (fRandomizePrimary) {
     G4int i = (int)(5.*G4UniformRand());
@@ -165,6 +172,18 @@ void T2K_PrimaryGeneratorAction::DefineCommands()
   randomCmd.SetGuidance(guidance);
   randomCmd.SetParameterName("flg", true);
   randomCmd.SetDefaultValue("true");
+  
+  // randomizePrimary command
+  auto& t2kGenCmd
+    = fMessenger->DeclareProperty("T2KGenerator", fT2KGenerator);
+  
+  G4String guidanceT2KGen
+    = "Boolean flag to give the control to T2K/generator \n";
+  t2kGenCmd.SetGuidance(guidanceT2KGen);
+  t2kGenCmd.SetParameterName("t2kgenflag", true);
+  t2kGenCmd.SetDefaultValue("false");
+  
+  
 }
 
 //..oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

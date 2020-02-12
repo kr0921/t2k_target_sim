@@ -66,6 +66,10 @@ class T2K_PrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction
 
     void SetRandomize(G4bool val) { fRandomizePrimary = val; }
     G4bool GetRandomize() const { return fRandomizePrimary; }
+    
+    void SetT2KGenerator(G4bool val) { fT2KGenerator = val; }
+    G4bool GetT2KGenerator() const { return fT2KGenerator; }
+    
 
   private:
     void DefineCommands();
@@ -81,6 +85,7 @@ class T2K_PrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction
     G4double fSigmaMomentum;
     G4double fSigmaAngle;
     G4bool fRandomizePrimary;
+    G4bool fT2KGenerator; // whether to control with T2K/generator
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
