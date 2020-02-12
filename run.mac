@@ -17,6 +17,13 @@
 /gun/number   1      # number of particles
 
 /gun/energy 30 GeV
+
+
+
+/T2K/generator/T2KGenerator FALSE
+
+/T2K/generator/momentum 1000
+
 /T2K/generator/randomizePrimary FALSE
 /T2K/generator/sigmaMomentum 0.
 /T2K/generator/sigmaAngle 0.
