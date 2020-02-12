@@ -48,6 +48,7 @@
 #include "G4PVParameterised.hh"
 #include "G4PVReplica.hh"
 #include "G4UserLimits.hh"
+#include "G4SubtractionSolid.hh"
 
 #include "G4SDManager.hh"
 #include "G4VSensitiveDetector.hh"
@@ -68,7 +69,7 @@
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 T2K_DetectorConstruction::T2K_DetectorConstruction()
-: G4VUserDetectorConstruction(),
+  : G4VUserDetectorConstruction(),
   fVisAttributes(),
   fCheckOverlaps(true)
 {
@@ -91,73 +92,149 @@ G4VPhysicalVolume* T2K_DetectorConstruction::Construct()
 
   ConstructMaterials();
 
+  // Eps
+  G4double eps = 0.001;
+  
   // Geometry parameters
-  auto  worldSizeXY = 0.2 * m;
-  auto  worldSizeZ  = 2 * m;
+  auto  worldSizeXY = 0.5 * m;
+  auto  worldSizeZ  = 4 * m;
 
-  float target_length    = 914.;
-  float target_diameter   = 26.;
+  // Target
+  G4double target_length  = 914.;
+  G4double target_diameter = 26.;
+
+  // Helium cylinder volume
+  G4double he_diameter = 30.;
+  G4double he_length   = 2238.13;
+  
+  
+  // Baffle
+  G4double baffle_lengthX = 290.; 
+  G4double baffle_lengthY = 400.;  
+  G4double baffle_lengthZ = 1711.45;
+  
+  // Baffle hole
+  G4double baffle_hole_diameter = he_diameter;
+  
+  // Distance between baffle downstream end and target
+  G4double baffle_target_distance = 526.68;
 
 
   // Get materials
-  auto defaultMaterial = G4Material::GetMaterial("G4_AIR");
+  auto defaultMaterial  = G4Material::GetMaterial("G4_AIR");
   auto carbonMaterial   = G4Material::GetMaterial("Carbon");
+  auto heliumMaterial  =  G4Material::GetMaterial("G4_He");
 
-  if ( ! defaultMaterial || ! carbonMaterial ) {
-    G4ExceptionDescription msg;
-    msg << "Cannot retrieve materials already defined.";
-    G4Exception("T2K_DetectorConstruction::DefineVolumes()",
-      "MyCode0001", FatalException, msg);
-  }
+
+    if ( ! defaultMaterial || ! carbonMaterial ) {
+      G4ExceptionDescription msg;
+      msg << "Cannot retrieve materials already defined.";
+      G4Exception("T2K_DetectorConstruction::DefineVolumes()",
+          "MyCode0001", FatalException, msg);
+    }
 
   //
   // World
   //
   auto worldS
     = new G4Box("World",           // its name
-                 worldSizeXY/2, worldSizeXY/2, worldSizeZ/2); // its size
+        worldSizeXY/2, worldSizeXY/2, worldSizeZ/2); // its size
 
   auto worldLV
     = new G4LogicalVolume(
-                 worldS,           // its solid
-                 defaultMaterial,  // its material
-                 "World");         // its name
+        worldS,           // its solid
+        defaultMaterial,  // its material
+        "World");         // its name
 
   auto worldPV
     = new G4PVPlacement(
-                 0,                // no rotation
-                 G4ThreeVector(),  // at (0,0,0)
-                 worldLV,          // its logical volume
-                 "World",          // its name
-                 0,                // its mother  volume
-                 false,            // no boolean operation
-                 0,                // copy number
-                 fCheckOverlaps);  // checking overlaps
+        0,                // no rotation
+        G4ThreeVector(),  // at (0,0,0)
+        worldLV,          // its logical volume
+        "World",          // its name
+        0,                // its mother  volume
+        false,            // no boolean operation
+        0,                // copy number
+        fCheckOverlaps);  // checking overlaps
+   
 
-  //
-  // Cargon target
-  //
+  // Carbon buffle with a hole 
 
+  auto baffle_box  = new G4Box("baffle", baffle_lengthX/2., baffle_lengthY/2., baffle_lengthZ/2.);
+  
+  auto baffle_hole_cylinder
+    = new G4Tubs("hole",                          // its name
+        0., 
+        baffle_hole_diameter/2. + eps, baffle_lengthZ/2. + eps, // its size
+        0.0 * deg,  360.0 * deg);                   // its segment
+
+
+  auto baffle_with_hole = new G4SubtractionSolid("baffle_with_hole", baffle_box, baffle_hole_cylinder);  
+  
+  
+  auto baffle_LV
+    = new G4LogicalVolume(
+        baffle_with_hole,      // its solid
+        carbonMaterial,  // its material
+        "BAFFLE");       // its name
+  
+  new G4PVPlacement(
+      0,                 // no rotation
+      G4ThreeVector(0., 0., -(baffle_lengthZ/2. + baffle_target_distance)),  // at (0,0,h/2)
+      baffle_LV,         // its logical volume
+      "BAFFLE",          // its name
+      worldLV,           // its mother  volume
+      false,             // no boolean operation
+      0,                 // copy number
+      fCheckOverlaps);   // checking overlaps
+
+  // Helium cylinder
+ 
+  auto he_cylinder
+    = new G4Tubs("he_volume",                                // its name
+        0., he_diameter/2., he_length/2.,  // its size
+        0.0 * deg,  360.0 * deg);                // its segment
+
+  auto he_LV
+    = new G4LogicalVolume(
+        he_cylinder,      // its solid
+        heliumMaterial,       // its material
+        "HE_VOLUME");            // its name
+
+  new G4PVPlacement(
+      0,                 // no rotation
+      G4ThreeVector(0., 0., -(he_length/2. + eps)),  // at (0,0,h/2)
+      he_LV,         // its logical volume
+      "HE_VOLUME",          // its name
+      worldLV,           // its mother  volume
+      false,             // no boolean operation
+      0,                 // copy number
+      fCheckOverlaps);   // checking overlaps
+
+ 
+  
+  // Carbon target
+  
   auto target_cylinder
     = new G4Tubs("target",                                // its name
-                 0., target_diameter/2, target_length/2,  // its size
-                 0.0 * deg,  360.0 * deg);                // its segment
+        0., target_diameter/2., target_length/2.,  // its size
+        0.0 * deg,  360.0 * deg);                // its segment
 
   auto target_LV
     = new G4LogicalVolume(
-                target_cylinder,      // its solid
-                carbonMaterial,       // its material
-                "TARGET");            // its name
+        target_cylinder,      // its solid
+        carbonMaterial,       // its material
+        "TARGET");            // its name
 
   new G4PVPlacement(
-               0,                 // no rotation
-               G4ThreeVector(0., 0., target_length/2.),  // at (0,0,h/2)
-               target_LV,         // its logical volume
-               "TARGET",          // its name
-               worldLV,           // its mother  volume
-               false,             // no boolean operation
-               0,                 // copy number
-               fCheckOverlaps);   // checking overlaps
+      0,                 // no rotation
+      G4ThreeVector(0., 0., target_length/2.),  // at (0,0,h/2)
+      target_LV,         // its logical volume
+      "TARGET",          // its name
+      worldLV,           // its mother  volume
+      false,             // no boolean operation
+      0,                 // copy number
+      fCheckOverlaps);   // checking overlaps
 
 
   //
@@ -169,10 +246,21 @@ G4VPhysicalVolume* T2K_DetectorConstruction::Construct()
   // visualization attributes ------------------------------------------------
 
 
-  auto visAttributes = new G4VisAttributes(G4Colour(0.9, 0.9, 0.9));   // LightGray
-  target_LV->SetVisAttributes(visAttributes);
-  fVisAttributes.push_back(visAttributes);
-
+  auto visAttributesCarbon = new G4VisAttributes(G4Colour(0.9, 0.9, 0.9));   // LightGray
+ 
+  auto visAttributesHelium = new G4VisAttributes(G4Colour::Cyan());   // Cyan 
+  
+  // Carbon
+  target_LV->SetVisAttributes(visAttributesCarbon);
+  baffle_LV->SetVisAttributes(visAttributesCarbon);
+  
+  // Helium
+  he_LV->SetVisAttributes(visAttributesHelium);
+  
+  
+  fVisAttributes.push_back(visAttributesCarbon);
+  fVisAttributes.push_back(visAttributesHelium);
+  
   return worldPV;
 }
 
@@ -183,6 +271,10 @@ void T2K_DetectorConstruction::ConstructMaterials()
 
   // Air
   nistManager->FindOrBuildMaterial("G4_AIR");
+
+  // Helium
+  nistManager->FindOrBuildMaterial("G4_He");
+
 
   G4double a;  // mass of a mole;
   G4double z;  // z=mean number of protons;
