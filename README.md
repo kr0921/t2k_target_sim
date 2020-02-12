@@ -17,6 +17,16 @@ output_root_file.root:
         |-- pos_y       # production position y [mm]
         |-- pos_z       # production position z [mm]
 
-## Target geometry
+## Target station geometry
+
+## Baffle
+Box 29 cm x 40 cm x 171.145 cm, 1.8g/cm^3 graphite
+
+## He volume
+
+Cylinder 223.813 cm length 3 cm diameter helium
+
+## Target
 Cylinder 91.4 cm length 2.6 cm diameter, 1.8g/cm^3 graphite
+
 
