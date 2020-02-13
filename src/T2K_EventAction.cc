@@ -80,16 +80,22 @@ void T2K_EventAction::EndOfEventAction(const G4Event* event)
   // study how often pions/kaons leave the target
   auto TrajCont = event->GetTrajectoryContainer();
 
-  for (auto trajID = 0; trajID < TrajCont->entries(); ++trajID) {
+  for (uint trajID = 0; trajID < TrajCont->entries(); ++trajID) {
     auto traj = (T2K_Trajectory*)(*TrajCont)[trajID];
     if (!traj)
       continue;
     auto particle_PDG = traj->GetPDGEncoding();
 
     // interested only in neutral particles
-    if (traj->GetCharge()!=0)
-     continue;
+    if (traj->GetCharge()!=0 &&  abs(traj->GetPDGEncoding() != 211))
+      continue;
+    // suppress photons
+    if (traj->GetPDGEncoding() == 22)
+      continue;
 
+    // suppress neutrons
+    if (abs(traj->GetPDGEncoding()) == 2112)
+      continue;
 
     G4ThreeVector Mom     = traj->GetInitialMomentum();
     G4ThreeVector MomDir  = Mom;
