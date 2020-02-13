@@ -42,27 +42,19 @@
 T2K_PrimaryGeneratorAction::T2K_PrimaryGeneratorAction()
 : G4VUserPrimaryGeneratorAction(),
   fParticleGun(nullptr), fMessenger(nullptr),
-  fPositron(nullptr), fMuon(nullptr), fPion(nullptr),
-  fKaon(nullptr), fProton(nullptr),
-  fMomentum(1000.*MeV),
-  fSigmaMomentum(50.*MeV),
-  fSigmaAngle(2.*deg),
-  fRandomizePrimary(true), 
+  fBeamMeanX(0.*mm),
+  fBeamMeanY(0.*mm),
+  fBeamSigmaX(0.*mm),
+  fBeamSigmaY(0.*mm),
+  fAngleX(0.*mrad),
+  fAngleY(0.*mrad),
   fT2KGenerator(false)
 {
   G4int nofParticles = 1;
   fParticleGun  = new G4ParticleGun(nofParticles);
 
-  auto particleTable = G4ParticleTable::GetParticleTable();
-  fPositron = particleTable->FindParticle("e+");
-  fMuon = particleTable->FindParticle("mu+");
-  fPion = particleTable->FindParticle("pi+");
-  fKaon = particleTable->FindParticle("kaon+");
-  fProton = particleTable->FindParticle("proton");
-
   // default particle kinematics
   fParticleGun->SetParticlePosition(G4ThreeVector(0.,0.,-8.*m));
-  fParticleGun->SetParticleDefinition(fPositron);
 
   // define commands for this class
   DefineCommands();
@@ -80,48 +72,35 @@ T2K_PrimaryGeneratorAction::~T2K_PrimaryGeneratorAction()
 
 void T2K_PrimaryGeneratorAction::GeneratePrimaries(G4Event* event)
 {
-  
+
   if (!fT2KGenerator){
      fParticleGun->GeneratePrimaryVertex(event);
      return;
   }
-  
-  G4ParticleDefinition* particle;
-  if (fRandomizePrimary) {
-    G4int i = (int)(5.*G4UniformRand());
-    switch(i) {
-      case 0:
-          particle = fPositron;
-          break;
-      case 1:
-          particle = fMuon;
-          break;
-      case 2:
-          particle = fPion;
-          break;
-      case 3:
-          particle = fKaon;
-          break;
-      default:
-          particle = fProton;
-          break;
-    }
-    fParticleGun->SetParticleDefinition(particle);
-  }
-  else {
-    particle = fParticleGun->GetParticleDefinition();
-  }
 
-  auto pp = fMomentum + (G4UniformRand()-0.5)*fSigmaMomentum;
-  auto mass = particle->GetPDGMass();
-  auto ekin = std::sqrt(pp*pp+mass*mass)-mass;
-  fParticleGun->SetParticleEnergy(ekin);
 
-  auto angle = (G4UniformRand()-0.5)*fSigmaAngle;
-  fParticleGun->SetParticleMomentumDirection(
-                  G4ThreeVector(std::sin(angle),0.,std::cos(angle)));
+  // auto pp = fMomentum + (G4UniformRand()-0.5)*fSigmaMomentum;
+  // auto mass = particle->GetPDGMass();
+  // auto ekin = std::sqrt(pp*pp+mass*mass)-mass;
+  // fParticleGun->SetParticleEnergy(ekin);
+
+  G4ThreeVector vec(0., 0., 1.);
+  vec.setPhi(fAngleX);
+  vec.setTheta(fAngleY);
+  vec.setMag(1.);
+  fParticleGun->SetParticleMomentumDirection(vec);
 
   fParticleGun->GeneratePrimaryVertex(event);
+
+
+  G4RandGauss* x_rand = new G4RandGauss(G4Random::getTheEngine(), fBeamMeanX, fBeamSigmaX);
+  G4RandGauss* y_rand = new G4RandGauss(G4Random::getTheEngine(), fBeamMeanY, fBeamSigmaY);
+
+  float x = x_rand->fire();
+  float y = y_rand->fire();
+  float z = -2238.13 * mm;
+
+  event->GetPrimaryVertex()->SetPosition(x, y, z);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -134,56 +113,59 @@ void T2K_PrimaryGeneratorAction::DefineCommands()
                              "/T2K/generator/",
                              "Primary generator control");
 
-  // momentum command
-  auto& momentumCmd
-    = fMessenger->DeclarePropertyWithUnit("momentum", "MeV", fMomentum,
-        "Mean momentum of primaries.");
-  momentumCmd.SetParameterName("p", true);
-  momentumCmd.SetRange("p>=0.");
-  momentumCmd.SetDefaultValue("1000.");
-  // ok
-  //momentumCmd.SetParameterName("p", true);
-  //momentumCmd.SetRange("p>=0.");
-
-  // sigmaMomentum command
-  auto& sigmaMomentumCmd
-    = fMessenger->DeclarePropertyWithUnit("sigmaMomentum",
-        "MeV", fSigmaMomentum, "Sigma momentum of primaries.");
-  sigmaMomentumCmd.SetParameterName("sp", true);
-  sigmaMomentumCmd.SetRange("sp>=0.");
-  sigmaMomentumCmd.SetDefaultValue("50.");
-
-  // sigmaAngle command
-  auto& sigmaAngleCmd
-    = fMessenger->DeclarePropertyWithUnit("sigmaAngle", "deg", fSigmaAngle,
-        "Sigma angle divergence of primaries.");
-  sigmaAngleCmd.SetParameterName("t", true);
-  sigmaAngleCmd.SetRange("t>=0.");
-  sigmaAngleCmd.SetDefaultValue("2.");
-
-  // randomizePrimary command
-  auto& randomCmd
-    = fMessenger->DeclareProperty("randomizePrimary", fRandomizePrimary);
-  G4String guidance
-    = "Boolean flag for randomizing primary particle types.\n";
-  guidance
-    += "In case this flag is false, you can select the primary particle\n";
-  guidance += "  with /gun/particle command.";
-  randomCmd.SetGuidance(guidance);
-  randomCmd.SetParameterName("flg", true);
-  randomCmd.SetDefaultValue("true");
-  
-  // randomizePrimary command
   auto& t2kGenCmd
     = fMessenger->DeclareProperty("T2KGenerator", fT2KGenerator);
-  
+
   G4String guidanceT2KGen
     = "Boolean flag to give the control to T2K/generator \n";
   t2kGenCmd.SetGuidance(guidanceT2KGen);
   t2kGenCmd.SetParameterName("t2kgenflag", true);
   t2kGenCmd.SetDefaultValue("false");
-  
-  
+
+
+  // BeamMeanX command
+  auto& beamMeanX
+    = fMessenger->DeclarePropertyWithUnit("BeamMeanX", "cm", fBeamMeanX,
+        "Mean beam position");
+  beamMeanX.SetParameterName("X_m", true);
+  beamMeanX.SetDefaultValue("0.");
+
+  // BeamMeanY command
+  auto& beamMeanY
+    = fMessenger->DeclarePropertyWithUnit("BeamMeanY", "cm", fBeamMeanY,
+        "Mean beam position");
+  beamMeanY.SetParameterName("Y_m", true);
+  beamMeanY.SetDefaultValue("0.");
+
+  // BeamSigmaX command
+  auto& beamSigmaX
+    = fMessenger->DeclarePropertyWithUnit("BeamSigmaX", "cm", fBeamSigmaX,
+        "Mean beam position");
+  beamSigmaX.SetParameterName("X_s", true);
+  beamSigmaX.SetDefaultValue("0.");
+
+  // BeamSigmaY command
+  auto& beamSigmaY
+    = fMessenger->DeclarePropertyWithUnit("BeamSigmaY", "cm", fBeamSigmaY,
+        "Mean beam position");
+  beamSigmaY.SetParameterName("Y_s", true);
+  beamSigmaY.SetDefaultValue("0.");
+
+  // Angle X command
+  auto& beamAngleX
+    = fMessenger->DeclarePropertyWithUnit("AngleX", "mrad", fAngleX,
+        "Mean beam position");
+  beamAngleX.SetParameterName("angleX", true);
+  beamAngleX.SetDefaultValue("0.");
+
+  // Angle Y command
+  auto& beamAngleY
+    = fMessenger->DeclarePropertyWithUnit("AngleY", "mrad", fAngleY,
+        "Mean beam position");
+  beamAngleY.SetParameterName("angleY", true);
+  beamAngleY.SetDefaultValue("0.");
+
+
 }
 
 //..oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
