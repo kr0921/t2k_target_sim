@@ -16,7 +16,7 @@ T2K_UserTrackingAction::~T2K_UserTrackingAction() {}
 void T2K_UserTrackingAction::PreUserTrackingAction(const G4Track* trk) {
     G4VTrajectory* traj = new T2K_Trajectory(trk);
     fpTrackingManager->SetTrajectory(traj);
-    if (traj->GetCharge() == 0 && abs(traj->GetPDGEncoding() != 211)) {
+    if (traj->GetCharge() == 0 && abs(traj->GetPDGEncoding()) != 211) {
       if (traj->GetPDGEncoding() == 22)
         return;
       if (abs(traj->GetPDGEncoding()) == 2112)
