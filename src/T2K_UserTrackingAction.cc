@@ -14,44 +14,17 @@ T2K_UserTrackingAction::T2K_UserTrackingAction() {}
 T2K_UserTrackingAction::~T2K_UserTrackingAction() {}
 
 void T2K_UserTrackingAction::PreUserTrackingAction(const G4Track* trk) {
-    G4VTrajectory* traj = new T2K_Trajectory(trk);
-    fpTrackingManager->SetTrajectory(traj);
-    if (traj->GetCharge() == 0 && abs(traj->GetPDGEncoding()) != 211) {
-      if (traj->GetPDGEncoding() == 22)
-        return;
-      if (abs(traj->GetPDGEncoding()) == 2112)
-        return;
+  auto traj = new T2K_Trajectory(trk);
+  fpTrackingManager->SetTrajectory(traj);
 
-      fpTrackingManager->SetStoreTrajectory(true);
-    }
+  auto PDG = traj->GetPDGEncoding();
 
-    //G4cout << traj->GetPointEntries() << G4endl; //GetRange();
-}
-
-void T2K_UserTrackingAction::PostUserTrackingAction(const G4Track* trk) {
-  T2K_Trajectory* trajectory =
-    (T2K_Trajectory*)fpTrackingManager->GimmeTrajectory();
-
-  auto step = trk->GetStep();
-
-  auto TrackPoint = step->GetPreStepPoint();
-  if (TrackPoint == NULL)
+  if ((traj->GetCharge() == 0 || abs(PDG) == 211) &&
+      PDG != 22 && abs(PDG) != 2112) {
+    fpTrackingManager->SetStoreTrajectory(true);
+    fpTrackingManager->SetTrajectory(new T2K_Trajectory(trk));
     return;
-
-  G4String process_name_post = step->GetPostStepPoint()->GetProcessDefinedStep()->GetProcessName();
-
-  G4double energy_pre = TrackPoint->GetKineticEnergy();
-
-  auto MomDir     = TrackPoint->GetMomentumDirection();
-  MomDir /= MomDir.mag();
-  auto Position   = TrackPoint->GetPosition();
-  auto Momentum   = TrackPoint->GetMomentum();
-  auto VolumeName = TrackPoint->GetPhysicalVolume()->GetName();
-
-  trajectory->SetFinalPosition(Position);
-  trajectory->SetFinalEnergy(energy_pre);
-  trajectory->SetFinalMomentum(Momentum);
-  trajectory->SetFinalProcessName(process_name_post);
-  trajectory->SetFinalVolumeName(VolumeName);
+  } else
+    fpTrackingManager->SetStoreTrajectory(false);
 }
 

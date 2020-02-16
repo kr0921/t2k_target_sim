@@ -35,6 +35,8 @@
 #include "G4RunManager.hh"
 #include "G4EventManager.hh"
 #include "G4HCofThisEvent.hh"
+#include "G4TrajectoryContainer.hh"
+#include "G4Trajectory.hh"
 #include "G4VHitsCollection.hh"
 #include "G4SDManager.hh"
 #include "G4SystemOfUnits.hh"
@@ -77,8 +79,16 @@ void T2K_EventAction::EndOfEventAction(const G4Event* event)
   // Get analysis manager
   auto analysisManager = G4AnalysisManager::Instance();
 
+  if(event->GetNumberOfPrimaryVertex()==0) {
+    G4cout << "Event is empty." << G4endl;
+    return;
+  }
+
   // study how often pions/kaons leave the target
   auto TrajCont = event->GetTrajectoryContainer();
+
+  if (!TrajCont)
+    return;
 
   for (uint trajID = 0; trajID < TrajCont->entries(); ++trajID) {
     auto traj = (T2K_Trajectory*)(*TrajCont)[trajID];
@@ -87,14 +97,14 @@ void T2K_EventAction::EndOfEventAction(const G4Event* event)
     auto particle_PDG = traj->GetPDGEncoding();
 
     // interested only in neutral particles
-    if (traj->GetCharge()!=0 &&  abs(traj->GetPDGEncoding() != 211))
+    if (traj->GetCharge() != 0 &&  abs(particle_PDG) != 211)
       continue;
     // suppress photons
-    if (traj->GetPDGEncoding() == 22)
+    if (particle_PDG == 22)
       continue;
 
     // suppress neutrons
-    if (abs(traj->GetPDGEncoding()) == 2112)
+    if (abs(particle_PDG) == 2112)
       continue;
 
     G4ThreeVector Mom     = traj->GetInitialMomentum();

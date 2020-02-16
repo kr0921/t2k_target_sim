@@ -14,6 +14,6 @@ class T2K_UserTrackingAction : public G4UserTrackingAction
     virtual ~T2K_UserTrackingAction();
 
     virtual void PreUserTrackingAction(const G4Track*);
-    virtual void PostUserTrackingAction(const G4Track*);
+    virtual void PostUserTrackingAction(const G4Track*) {;};
 };
 #endif

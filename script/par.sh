@@ -24,6 +24,6 @@ do
 done
 nice -n 19 parallel -j 15 -a commands.sh
 
-hadd -f T2K_target_sim_tot.root T2K_target_sim_v*.root
+#hadd -f T2K_target_sim_tot.root T2K_target_sim_v*.root
 #rm T2K_target_sim_v*.root
 email "G4 done" "T2K target G4 done"

@@ -42,7 +42,7 @@ class G4Run;
 class T2K_RunAction : public G4UserRunAction
 {
   public:
-    T2K_RunAction(T2K_EventAction* eventAction);
+    T2K_RunAction();
     virtual ~T2K_RunAction();
 
     virtual void BeginOfRunAction(const G4Run*);

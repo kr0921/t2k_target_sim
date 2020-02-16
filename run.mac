@@ -6,7 +6,7 @@
 #/run/numberOfWorkers 4
 /run/initialize
 
-/tracking/verbose 1
+#/tracking/verbose 1
 
 #
 #  turn off randomization
@@ -30,6 +30,6 @@
 /run/printProgress 1
 
 /analysis/setFileName T2K_target_sim
-/run/beamOn 1
+/run/beamOn 10
 
 

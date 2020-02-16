@@ -94,7 +94,7 @@ G4VPhysicalVolume* T2K_DetectorConstruction::Construct()
 
   // Eps
   G4double eps = 0.001;
-  
+
   // Geometry parameters
   auto  worldSizeXY = 0.5 * m;
   auto  worldSizeZ  = 4 * m;
@@ -106,16 +106,16 @@ G4VPhysicalVolume* T2K_DetectorConstruction::Construct()
   // Helium cylinder volume
   G4double he_diameter = 30.;
   G4double he_length   = 2238.13;
-  
-  
+
+
   // Baffle
-  G4double baffle_lengthX = 290.; 
-  G4double baffle_lengthY = 400.;  
+  G4double baffle_lengthX = 290.;
+  G4double baffle_lengthY = 400.;
   G4double baffle_lengthZ = 1711.45;
-  
+
   // Baffle hole
   G4double baffle_hole_diameter = he_diameter;
-  
+
   // Distance between baffle downstream end and target
   G4double baffle_target_distance = 526.68;
 
@@ -156,28 +156,28 @@ G4VPhysicalVolume* T2K_DetectorConstruction::Construct()
         false,            // no boolean operation
         0,                // copy number
         fCheckOverlaps);  // checking overlaps
-   
 
-  // Carbon buffle with a hole 
+
+  // Carbon buffle with a hole
 
   auto baffle_box  = new G4Box("baffle", baffle_lengthX/2., baffle_lengthY/2., baffle_lengthZ/2.);
-  
+
   auto baffle_hole_cylinder
     = new G4Tubs("hole",                          // its name
-        0., 
+        0.,
         baffle_hole_diameter/2. + eps, baffle_lengthZ/2. + eps, // its size
         0.0 * deg,  360.0 * deg);                   // its segment
 
 
-  auto baffle_with_hole = new G4SubtractionSolid("baffle_with_hole", baffle_box, baffle_hole_cylinder);  
-  
-  
+  auto baffle_with_hole = new G4SubtractionSolid("baffle_with_hole", baffle_box, baffle_hole_cylinder);
+
+
   auto baffle_LV
     = new G4LogicalVolume(
         baffle_with_hole,      // its solid
         carbonMaterial,  // its material
         "BAFFLE");       // its name
-  
+
   new G4PVPlacement(
       0,                 // no rotation
       G4ThreeVector(0., 0., -(baffle_lengthZ/2. + baffle_target_distance)),  // at (0,0,h/2)
@@ -189,7 +189,7 @@ G4VPhysicalVolume* T2K_DetectorConstruction::Construct()
       fCheckOverlaps);   // checking overlaps
 
   // Helium cylinder
- 
+
   auto he_cylinder
     = new G4Tubs("he_volume",                                // its name
         0., he_diameter/2., he_length/2.,  // its size
@@ -211,10 +211,10 @@ G4VPhysicalVolume* T2K_DetectorConstruction::Construct()
       0,                 // copy number
       fCheckOverlaps);   // checking overlaps
 
- 
-  
+
+
   // Carbon target
-  
+
   auto target_cylinder
     = new G4Tubs("target",                                // its name
         0., target_diameter/2., target_length/2.,  // its size
@@ -247,20 +247,20 @@ G4VPhysicalVolume* T2K_DetectorConstruction::Construct()
 
 
   auto visAttributesCarbon = new G4VisAttributes(G4Colour(0.9, 0.9, 0.9));   // LightGray
- 
-  auto visAttributesHelium = new G4VisAttributes(G4Colour::Cyan());   // Cyan 
-  
+
+  auto visAttributesHelium = new G4VisAttributes(G4Colour::Cyan());   // Cyan
+
   // Carbon
   target_LV->SetVisAttributes(visAttributesCarbon);
   baffle_LV->SetVisAttributes(visAttributesCarbon);
-  
+
   // Helium
   he_LV->SetVisAttributes(visAttributesHelium);
-  
-  
+
+
   fVisAttributes.push_back(visAttributesCarbon);
   fVisAttributes.push_back(visAttributesHelium);
-  
+
   return worldPV;
 }
 
@@ -296,7 +296,7 @@ void T2K_DetectorConstruction::ConstructMaterials()
   H2O->AddElement(ele_O, natoms=1);
 
 
-  G4cout << G4endl << "The materials defined are : " << G4endl << G4endl;
-  G4cout << *(G4Material::GetMaterialTable()) << G4endl;
+  // G4cout << G4endl << "The materials defined are : " << G4endl << G4endl;
+  // G4cout << *(G4Material::GetMaterialTable()) << G4endl;
 }
 

@@ -48,8 +48,7 @@ T2K_ActionInitialization::~T2K_ActionInitialization()
 
 void T2K_ActionInitialization::BuildForMaster() const
 {
-  T2K_EventAction* eventAction = new T2K_EventAction;
-  SetUserAction(new T2K_RunAction(eventAction));
+  SetUserAction(new T2K_RunAction);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -57,14 +56,10 @@ void T2K_ActionInitialization::BuildForMaster() const
 void T2K_ActionInitialization::Build() const
 {
   SetUserAction(new T2K_PrimaryGeneratorAction);
-
-  auto eventAction = new T2K_EventAction;
-  SetUserAction(eventAction);
-
-  SetUserAction(new T2K_RunAction(eventAction));
-  SetUserAction(new T2K_UserTrackingAction());
-  // OBSOLETE. Was used for the first checks
-  // SetUserAction(new T2K_SteppingAction());
+  SetUserAction(new T2K_RunAction);
+  //auto eventAction = new T2K_EventAction;
+  SetUserAction(new T2K_EventAction);
+  SetUserAction(new T2K_UserTrackingAction);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

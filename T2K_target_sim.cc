@@ -57,8 +57,12 @@ int main(int argc,char** argv)
 
   // Construct the default run manager
   //
+  auto nThreads = 4;
 #ifdef G4MULTITHREADED
   auto runManager = new G4MTRunManager;
+  if ( nThreads > 0 ) {
+    runManager->SetNumberOfThreads(nThreads);
+  }
 #else
   auto runManager = new G4RunManager;
 #endif
@@ -68,7 +72,7 @@ int main(int argc,char** argv)
 
   //auto physicsList = new FTFP_BERT;
   //physicsList->RegisterPhysics(new G4StepLimiterPhysics());
-  auto verbose = 1;
+  auto verbose = 0;
   auto* physicsList = new QGSP_BERT(verbose);
   //physlist->RegisterPhysics(new G4StepLimiterPhysics()); // attach the step limit to each particle
   //physlist->RegisterPhysics(new G4StepLimiterBuilder()); // attach the step limit to each particle
@@ -79,10 +83,10 @@ int main(int argc,char** argv)
   runManager->Initialize();
 
   // Visualization manager construction
-  auto visManager = new G4VisExecutive;
+  //auto visManager = new G4VisExecutive;
   // G4VisExecutive can take a verbosity argument - see /vis/verbose guidance.
   // G4VisManager* visManager = new G4VisExecutive("Quiet");
-  visManager->Initialize();
+  //visManager->Initialize();
 
   // Get the pointer to the User Interface manager
   auto UImanager = G4UImanager::GetUIpointer();
@@ -108,7 +112,7 @@ int main(int argc,char** argv)
   // owned and deleted by the run manager, so they should not be deleted
   // in the main() program !
 
-  delete visManager;
+  //delete visManager;
   delete runManager;
 
   return 0;

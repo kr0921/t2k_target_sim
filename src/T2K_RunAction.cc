@@ -32,15 +32,16 @@
 #include "T2K_Analysis.hh"
 
 #include "G4Run.hh"
+#include "G4RunManager.hh"
 #include "G4UnitsTable.hh"
 #include "G4SystemOfUnits.hh"
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-T2K_RunAction::T2K_RunAction(T2K_EventAction* eventAction)
- : G4UserRunAction(),
-   fEventAction(eventAction)
+T2K_RunAction::T2K_RunAction()
+ : G4UserRunAction()
 {
+  //G4RunManager::GetRunManager()->SetPrintProgress(1);
   // Create analysis manager
   // The choice of analysis technology is done via selectin of a namespace
   // in T2K_Analysis.hh
@@ -48,30 +49,24 @@ T2K_RunAction::T2K_RunAction(T2K_EventAction* eventAction)
   G4cout << "Using " << analysisManager->GetType() << G4endl;
 
   // Default settings
-  analysisManager->SetNtupleMerging(true);
+  //analysisManager->SetNtupleMerging(true);
      // Note: merging ntuples is available only with Root output
-  analysisManager->SetVerboseLevel(1);
+  //analysisManager->SetVerboseLevel(1);
   analysisManager->SetFileName("T2K_Sim");
-
-  // Book histograms, ntuple
-  //
 
   // Creating ntuple
   //
-  if ( fEventAction ) {
-    auto N_id = analysisManager->
-      CreateNtuple("T2K_neutral", "Neutral particles");
-    analysisManager->CreateNtupleDColumn("mom");   // N_id = 0   column Id = 0
-    analysisManager->CreateNtupleDColumn("pid");    // N_id = 0   column Id = 1
-    analysisManager->CreateNtupleDColumn("dir_x");  // N_id = 0   column Id = 2
-    analysisManager->CreateNtupleDColumn("dir_y");  // N_id = 0   column Id = 3
-    analysisManager->CreateNtupleDColumn("dir_z");  // N_id = 0   column Id = 4
-    analysisManager->CreateNtupleDColumn("pos_x");  // N_id = 0   column Id = 5
-    analysisManager->CreateNtupleDColumn("pos_y");  // N_id = 0   column Id = 6
-    analysisManager->CreateNtupleDColumn("pos_z");  // N_id = 0   column Id = 7
+  analysisManager->CreateNtuple("T2K_neutral", "Neutral particles");
+  analysisManager->CreateNtupleDColumn("mom");   // N_id = 0   column Id = 0
+  analysisManager->CreateNtupleDColumn("pid");    // N_id = 0   column Id = 1
+  analysisManager->CreateNtupleDColumn("dir_x");  // N_id = 0   column Id = 2
+  analysisManager->CreateNtupleDColumn("dir_y");  // N_id = 0   column Id = 3
+  analysisManager->CreateNtupleDColumn("dir_z");  // N_id = 0   column Id = 4
+  analysisManager->CreateNtupleDColumn("pos_x");  // N_id = 0   column Id = 5
+  analysisManager->CreateNtupleDColumn("pos_y");  // N_id = 0   column Id = 6
+  analysisManager->CreateNtupleDColumn("pos_z");  // N_id = 0   column Id = 7
 
-    analysisManager->FinishNtuple(N_id);
-  }
+  analysisManager->FinishNtuple();
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
