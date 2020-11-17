@@ -37,6 +37,7 @@ class T2K_Trajectory : public G4Trajectory
     G4String GetFinalProcessName() {return FinalProcessName;}
     G4String GetFinalVolumeName() {return FinalVolumeName;}
     G4String GetInitialVolumeName() {return InitialVolumeName;}
+    G4String GetInitialProcessName() {return process;}
 
     void SetInitialPosition(G4ThreeVector vect) {InitialPosition = vect;}
     void SetFinalPosition(G4ThreeVector vect) {FinalPosition = vect;}
@@ -54,6 +55,12 @@ class T2K_Trajectory : public G4Trajectory
 
     //G4float InitialEnergy;
     G4float FinalEnergy;
+
+    // parent ID
+    G4int ParentID;
+
+    // parent PDG
+    G4String process;
 
     //G4ThreeVector InitialMomentum;
     G4ThreeVector FinalMomentum;

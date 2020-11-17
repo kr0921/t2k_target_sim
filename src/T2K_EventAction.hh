@@ -33,6 +33,7 @@
 
 #include "G4UserEventAction.hh"
 #include "globals.hh"
+#include "T2K_Trajectory.hh"
 
 #include <vector>
 #include <array>
@@ -47,6 +48,7 @@ public:
 
     virtual void BeginOfEventAction(const G4Event*) {;};
     virtual void EndOfEventAction(const G4Event*);
+    G4int GetTrajPIDById(const G4Event* event, const int id);
 
     //std::vector<G4double>& GetEmCalEdep() { return fCalEdep[kEm]; }
     //std::vector<G4double>& GetHadCalEdep() { return fCalEdep[kHad]; }

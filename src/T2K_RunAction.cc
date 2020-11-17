@@ -57,7 +57,7 @@ T2K_RunAction::T2K_RunAction()
   // Creating ntuple
   //
   analysisManager->CreateNtuple("T2K_neutral", "Neutral particles");
-  analysisManager->CreateNtupleDColumn("mom");   // N_id = 0   column Id = 0
+  analysisManager->CreateNtupleDColumn("mom");    // N_id = 0   column Id = 0
   analysisManager->CreateNtupleDColumn("pid");    // N_id = 0   column Id = 1
   analysisManager->CreateNtupleDColumn("dir_x");  // N_id = 0   column Id = 2
   analysisManager->CreateNtupleDColumn("dir_y");  // N_id = 0   column Id = 3
@@ -65,6 +65,9 @@ T2K_RunAction::T2K_RunAction()
   analysisManager->CreateNtupleDColumn("pos_x");  // N_id = 0   column Id = 5
   analysisManager->CreateNtupleDColumn("pos_y");  // N_id = 0   column Id = 6
   analysisManager->CreateNtupleDColumn("pos_z");  // N_id = 0   column Id = 7
+  analysisManager->CreateNtupleDColumn("parent"); // N_id = 0   column Id = 8
+  analysisManager->CreateNtupleSColumn("process");// N_id = 0   column Id = 9
+  analysisManager->CreateNtupleDColumn("parent_pdg");// N_id = 0   column Id = 10
 
   analysisManager->FinishNtuple();
 }

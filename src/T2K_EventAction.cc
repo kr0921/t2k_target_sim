@@ -29,7 +29,7 @@
 
 #include "T2K_EventAction.hh"
 #include "T2K_Analysis.hh"
-#include "T2K_Trajectory.hh"
+
 
 #include "G4Event.hh"
 #include "G4RunManager.hh"
@@ -67,6 +67,25 @@ T2K_EventAction::T2K_EventAction()
 
 T2K_EventAction::~T2K_EventAction()
 {}
+
+G4int T2K_EventAction::GetTrajPIDById(const G4Event* event, const int id) {
+  auto TrajCont = event->GetTrajectoryContainer();
+
+  if (!TrajCont)
+    return -1;
+
+  for (uint trajID = 0; trajID < TrajCont->entries(); ++trajID) {
+    auto traj = (T2K_Trajectory*)(*TrajCont)[trajID];
+    if (!traj)
+      continue;
+    if (traj->GetTrackID() == id) {
+      G4int particle_PDG = traj->GetPDGEncoding();
+      return particle_PDG;
+    }
+  }
+  return -1;
+
+}
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -115,6 +134,10 @@ void T2K_EventAction::EndOfEventAction(const G4Event* event)
       MomDir = G4ThreeVector(0., 0., 0.);
 
     G4ThreeVector Position = traj->GetInitialPosition();
+    G4int parent = traj->GetParentID();
+    G4String process = traj->GetInitialProcessName();
+
+
 
     // Fill tree
     analysisManager->FillNtupleDColumn(0, 0, Mom.mag());
@@ -125,6 +148,11 @@ void T2K_EventAction::EndOfEventAction(const G4Event* event)
     analysisManager->FillNtupleDColumn(0, 5, Position.x());
     analysisManager->FillNtupleDColumn(0, 6, Position.y());
     analysisManager->FillNtupleDColumn(0, 7, Position.z());
+    analysisManager->FillNtupleDColumn(0, 8, parent);
+    analysisManager->FillNtupleSColumn(0, 9, process);
+
+    G4int parent_pid = GetTrajPIDById(event, parent);
+    analysisManager->FillNtupleDColumn(0, 10, parent_pid);
 
     analysisManager->AddNtupleRow(0);
   } // loop over trajectories in the event

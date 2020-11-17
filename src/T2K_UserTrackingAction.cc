@@ -19,12 +19,12 @@ void T2K_UserTrackingAction::PreUserTrackingAction(const G4Track* trk) {
 
   auto PDG = traj->GetPDGEncoding();
 
-  if ((traj->GetCharge() == 0 || abs(PDG) == 211) &&
-      PDG != 22 && abs(PDG) != 2112) {
+  // if ((traj->GetCharge() == 0 || abs(PDG) == 211) &&
+  //     PDG != 22 && abs(PDG) != 2112) {
     fpTrackingManager->SetStoreTrajectory(true);
     fpTrackingManager->SetTrajectory(new T2K_Trajectory(trk));
     return;
-  } else
-    fpTrackingManager->SetStoreTrajectory(false);
+  // } else
+  //   fpTrackingManager->SetStoreTrajectory(false);
 }
 

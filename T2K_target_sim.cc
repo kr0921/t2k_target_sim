@@ -73,7 +73,8 @@ int main(int argc,char** argv)
   //auto physicsList = new FTFP_BERT;
   //physicsList->RegisterPhysics(new G4StepLimiterPhysics());
   auto verbose = 0;
-  auto* physicsList = new QGSP_BERT(verbose);
+  // auto* physicsList = new QGSP_BERT(verbose);
+  auto* physicsList = new FTFP_BERT(verbose);
   //physlist->RegisterPhysics(new G4StepLimiterPhysics()); // attach the step limit to each particle
   //physlist->RegisterPhysics(new G4StepLimiterBuilder()); // attach the step limit to each particle
   runManager->SetUserInitialization(physicsList);

@@ -10,6 +10,7 @@
 #include "G4VisAttributes.hh"
 #include "G4VVisManager.hh"
 #include "G4Polymarker.hh"
+#include <G4VProcess.hh>
 
 G4ThreadLocal G4Allocator<T2K_Trajectory>* T2K_TrajectoryAllocator = nullptr;
 
@@ -30,6 +31,12 @@ T2K_Trajectory::T2K_Trajectory(const G4Track* aTrack)
   //PDG = aTrack->GetParticleDefinition()->GetPDGEncoding();
   InitialPosition = aTrack->GetPosition();
   InitialVolumeName = aTrack->GetVolume()->GetName();
+  ParentID = aTrack->GetParentID();
+  const G4VProcess* proc = aTrack->GetCreatorProcess();
+  if (proc)
+    process = proc->GetProcessName();
+  else
+    process = "primary";
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
