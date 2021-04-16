@@ -36,7 +36,7 @@
 #include "T2K_Trajectory.hh"
 
 #include <vector>
-#include <array>
+// #include <array>
 
 /// Event action
 

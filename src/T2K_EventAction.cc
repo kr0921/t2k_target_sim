@@ -42,7 +42,7 @@
 #include "G4SystemOfUnits.hh"
 #include "G4ios.hh"
 
-using std::array;
+// using std::array;
 using std::vector;
 
 
@@ -95,67 +95,7 @@ void T2K_EventAction::EndOfEventAction(const G4Event* event)
   // Fill histograms & ntuple
   //
   (void)event;
-  // Get analysis manager
-  auto analysisManager = G4AnalysisManager::Instance();
 
-  if(event->GetNumberOfPrimaryVertex()==0) {
-    G4cout << "Event is empty." << G4endl;
-    return;
-  }
-
-  // study how often pions/kaons leave the target
-  auto TrajCont = event->GetTrajectoryContainer();
-
-  if (!TrajCont)
-    return;
-
-  for (uint trajID = 0; trajID < TrajCont->entries(); ++trajID) {
-    auto traj = (T2K_Trajectory*)(*TrajCont)[trajID];
-    if (!traj)
-      continue;
-    auto particle_PDG = traj->GetPDGEncoding();
-
-    // interested only in neutral particles
-    if (traj->GetCharge() != 0 &&  abs(particle_PDG) != 211)
-      continue;
-    // suppress photons
-    if (particle_PDG == 22)
-      continue;
-
-    // suppress neutrons
-    if (abs(particle_PDG) == 2112)
-      continue;
-
-    G4ThreeVector Mom     = traj->GetInitialMomentum();
-    G4ThreeVector MomDir  = Mom;
-    if (MomDir.mag())
-      MomDir /= MomDir.mag();
-    else
-      MomDir = G4ThreeVector(0., 0., 0.);
-
-    G4ThreeVector Position = traj->GetInitialPosition();
-    G4int parent = traj->GetParentID();
-    G4String process = traj->GetInitialProcessName();
-
-
-
-    // Fill tree
-    analysisManager->FillNtupleDColumn(0, 0, Mom.mag());
-    analysisManager->FillNtupleDColumn(0, 1, particle_PDG);
-    analysisManager->FillNtupleDColumn(0, 2, MomDir.x());
-    analysisManager->FillNtupleDColumn(0, 3, MomDir.y());
-    analysisManager->FillNtupleDColumn(0, 4, MomDir.z());
-    analysisManager->FillNtupleDColumn(0, 5, Position.x());
-    analysisManager->FillNtupleDColumn(0, 6, Position.y());
-    analysisManager->FillNtupleDColumn(0, 7, Position.z());
-    analysisManager->FillNtupleDColumn(0, 8, parent);
-    analysisManager->FillNtupleSColumn(0, 9, process);
-
-    G4int parent_pid = GetTrajPIDById(event, parent);
-    analysisManager->FillNtupleDColumn(0, 10, parent_pid);
-
-    analysisManager->AddNtupleRow(0);
-  } // loop over trajectories in the event
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

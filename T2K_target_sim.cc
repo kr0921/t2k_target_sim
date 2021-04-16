@@ -39,6 +39,7 @@
 #include "G4UImanager.hh"
 #include "FTFP_BERT.hh"
 #include "QGSP_BERT.hh"
+#include "QGSP_BIC.hh"
 #include "G4StepLimiterPhysics.hh"
 
 #include "G4VisExecutive.hh"
@@ -72,9 +73,10 @@ int main(int argc,char** argv)
 
   //auto physicsList = new FTFP_BERT;
   //physicsList->RegisterPhysics(new G4StepLimiterPhysics());
-  auto verbose = 0;
-  // auto* physicsList = new QGSP_BERT(verbose);
-  auto* physicsList = new FTFP_BERT(verbose);
+  int verbose = 0;
+  auto* physicsList = new QGSP_BERT(verbose);
+  // auto* physicsList = new QGSP_BIC(verbose);
+  // FTFP_BERT* physicsList = new FTFP_BERT(verbose);
   //physlist->RegisterPhysics(new G4StepLimiterPhysics()); // attach the step limit to each particle
   //physlist->RegisterPhysics(new G4StepLimiterBuilder()); // attach the step limit to each particle
   runManager->SetUserInitialization(physicsList);
