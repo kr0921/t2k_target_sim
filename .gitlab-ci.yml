@@ -16,6 +16,6 @@ build:
 Run_test:
   stage: test
   before_script:
-    - source $COMMON_INSTALL_PREFIX/usr/local/bin/geant.sh
+    - source $COMMON_INSTALL_PREFIX/bin/geant.sh
   script:
     - ./build/T2K_target_sim run.mac
