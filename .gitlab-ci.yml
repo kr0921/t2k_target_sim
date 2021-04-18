@@ -3,7 +3,7 @@ image: bars21/dev_hep_geant:4.10.7.1gcc9
 build:
   stage: build
   before_script:
-    - source $COMMON_INSTALL_PREFIX/usr/local/bin/geant.sh
+    - source $COMMON_INSTALL_PREFIX/bin/geant.sh
   script:
     - mkdir build; cd build
     - cmake ../
