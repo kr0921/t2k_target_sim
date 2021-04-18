@@ -12,42 +12,111 @@
 #include "G4Polymarker.hh"
 #include <G4VProcess.hh>
 
+#include "T2K_TrajectoryPoint.hh"
+
 G4ThreadLocal G4Allocator<T2K_Trajectory>* T2K_TrajectoryAllocator = nullptr;
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-T2K_Trajectory::T2K_Trajectory()
-  :G4Trajectory()
-{
+//******************************************************************************
+T2K_Trajectory::T2K_Trajectory():
+   fPositionRecord(0),
+   fTrackID(0),
+   fParentID(0),
+   fPDGEncoding(0),
+   fPDGCharge(0),
+   fInitialProcessName(""),
+   fInitialMomentum(0),
+   fInitialPosition(0),
+   fInitialVolumeName(""),
+   fTrackLength(0.)
+   {
+//******************************************************************************
   //fParticleDefinition = nullptr;
 }
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-T2K_Trajectory::T2K_Trajectory(const G4Track* aTrack)
-  :G4Trajectory(aTrack)
-{
-  //fParticleDefinition=aTrack->GetDefinition();
-  //PDG = aTrack->GetParticleDefinition()->GetPDGEncoding();
-  InitialPosition = aTrack->GetPosition();
-  InitialVolumeName = aTrack->GetVolume()->GetName();
-  ParentID = aTrack->GetParentID();
+//******************************************************************************
+T2K_Trajectory::T2K_Trajectory(const G4Track* aTrack) {
+//******************************************************************************
+  fPositionRecord = new TrajectoryPointContainer();
+  auto point = new T2KTrajectoryPoint(aTrack);
+  // Initial params
   const G4VProcess* proc = aTrack->GetCreatorProcess();
   if (proc)
-    process = proc->GetProcessName();
+    fInitialProcessName = proc->GetProcessName();
   else
-    process = "primary";
+    fInitialProcessName = "primary";
+  fInitialPosition = aTrack->GetPosition();
+  fInitialVolumeName = aTrack->GetVolume()->GetName();
+  fParentID = aTrack->GetParentID();
+
+
+  point->SetProcessName(fInitialProcessName);
+  point->SetVolumeName(fInitialVolumeName);
+  fPositionRecord->push_back(point);
+
+  fTrackID = aTrack->GetTrackID();
+  fParentID = aTrack->GetParentID();
+  fPDGEncoding = aTrack->GetParticleDefinition()->GetPDGEncoding();
+
+
+
+
 }
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-T2K_Trajectory::T2K_Trajectory(T2K_Trajectory &right)
-  :G4Trajectory(right)
-{
+//******************************************************************************
+T2K_Trajectory::T2K_Trajectory(T2K_Trajectory &right) {
+//******************************************************************************
   //fParticleDefinition=right.fParticleDefinition;
-  //PDG = right.PDG;
+  fTrackID = right.fTrackID;
+  fParentID = right.fParentID;
+  fPDGEncoding = right.fPDGEncoding;
+  fPDGCharge = right.fPDGCharge;
+
+  // initial
+  fInitialProcessName = right.fInitialProcessName;
+  fInitialMomentum = right.fInitialMomentum;
+  fInitialPosition = right.fInitialPosition;
+  fInitialVolumeName = right.fInitialVolumeName;
+
+  // final
+  fFinalProcessName = right.fFinalProcessName;
+  fFinalMomentum = right.fFinalMomentum;
+  fFinalPosition = right.fFinalPosition;
+  fFinalVolumeName = right.fFinalVolumeName;
+
+  fTrackLength = right.fTrackLength;
 }
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+T2K_Trajectory::~T2K_Trajectory() {;}
 
-T2K_Trajectory::~T2K_Trajectory() {}
+//******************************************************************************
+void T2K_Trajectory::AppendStep(const G4Step* aStep) {
+//******************************************************************************
+  auto T2K_point = new T2KTrajectoryPoint(aStep);
+  // process in the final point is stored in postPoint
+  // But the moomentum at post point is 0, so should use prePoint
+
+  auto prePoint = aStep->GetPreStepPoint();
+  auto postPoint = aStep->GetPostStepPoint();
+
+  fTrackLength += aStep->GetStepLength();
+  if (prePoint) {
+    fFinalMomentum = prePoint->GetMomentum();
+    if (prePoint->GetPhysicalVolume())
+      T2K_point->SetVolumeName(prePoint->GetPhysicalVolume()->GetName());
+  }
+
+  if (postPoint) {
+    auto process = postPoint->GetProcessDefinedStep();
+    if (process)
+      T2K_point->SetProcessName(process->GetProcessName());
+    else
+      T2K_point->SetProcessName("primary");
+    if (postPoint->GetPhysicalVolume())
+      T2K_point->SetVolumeName(postPoint->GetPhysicalVolume()->GetName());
+    fFinalProcessName = T2K_point->GetProcessName();
+    fFinalVolumeName = T2K_point->GetVolumeName();
+    fFinalPosition = T2K_point->GetPosition();
+  }
+
+  fPositionRecord->push_back(T2K_point);
+}

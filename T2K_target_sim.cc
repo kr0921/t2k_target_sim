@@ -58,7 +58,7 @@ int main(int argc,char** argv)
 
   // Construct the default run manager
   //
-  auto nThreads = 4;
+  auto nThreads = 1;
 #ifdef G4MULTITHREADED
   auto runManager = new G4MTRunManager;
   if ( nThreads > 0 ) {
@@ -71,14 +71,9 @@ int main(int argc,char** argv)
   // Mandatory user initialization classes
   runManager->SetUserInitialization(new T2K_DetectorConstruction);
 
-  //auto physicsList = new FTFP_BERT;
-  //physicsList->RegisterPhysics(new G4StepLimiterPhysics());
   int verbose = 0;
   auto* physicsList = new QGSP_BERT(verbose);
-  // auto* physicsList = new QGSP_BIC(verbose);
-  // FTFP_BERT* physicsList = new FTFP_BERT(verbose);
-  //physlist->RegisterPhysics(new G4StepLimiterPhysics()); // attach the step limit to each particle
-  //physlist->RegisterPhysics(new G4StepLimiterBuilder()); // attach the step limit to each particle
+
   runManager->SetUserInitialization(physicsList);
 
   // User action initialization
@@ -86,10 +81,8 @@ int main(int argc,char** argv)
   runManager->Initialize();
 
   // Visualization manager construction
-  //auto visManager = new G4VisExecutive;
-  // G4VisExecutive can take a verbosity argument - see /vis/verbose guidance.
-  // G4VisManager* visManager = new G4VisExecutive("Quiet");
-  //visManager->Initialize();
+  // auto visManager = new G4VisExecutive;
+  // visManager->Initialize();
 
   // Get the pointer to the User Interface manager
   auto UImanager = G4UImanager::GetUIpointer();
@@ -115,7 +108,7 @@ int main(int argc,char** argv)
   // owned and deleted by the run manager, so they should not be deleted
   // in the main() program !
 
-  //delete visManager;
+  // delete visManager;
   delete runManager;
 
   return 0;

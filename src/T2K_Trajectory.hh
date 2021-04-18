@@ -1,7 +1,7 @@
 #ifndef T2K_Trajectory_h
-#define T2K_Trajectory_h 1
+#define T2K_Trajectory_h
 
-#include "G4Trajectory.hh"
+#include "G4VTrajectory.hh"
 #include "G4Allocator.hh"
 #include "G4ios.hh"
 #include "globals.hh"
@@ -10,68 +10,84 @@
 #include "G4Track.hh"
 #include "G4Step.hh"
 
-class G4Polyline;                   // Forward declaration.
+#include "T2K_TrajectoryPoint.hh"
 
-class T2K_Trajectory : public G4Trajectory
+class G4Polyline;         // Forward declaration.
+
+typedef std::vector<G4VTrajectoryPoint*>  TrajectoryPointContainer;
+
+class T2K_Trajectory : public G4VTrajectory
 {
-  public:
+public:
 
-    T2K_Trajectory();
-    T2K_Trajectory(const G4Track* aTrack);
-    T2K_Trajectory(T2K_Trajectory &);
-    virtual ~T2K_Trajectory();
+  T2K_Trajectory();
+  T2K_Trajectory(const G4Track* aTrack);
+  T2K_Trajectory(T2K_Trajectory &);
+  virtual ~T2K_Trajectory();
 
-    inline void* operator new(size_t);
-    inline void  operator delete(void*);
+  inline void* operator new(size_t);
+  inline void  operator delete(void*);
 
-    //G4int GetPDG() {return PDG;}
-    //G4float GetInitialEnergy() {return InitialEnergy;}
-    G4float GetFinalEnergy() {return FinalEnergy;}
+  G4int GetTrackID() const {return fTrackID;}
+  G4int GetParentID() const {return fParentID;}
+  G4String GetParticleName() const {return "";}
+  G4double GetCharge() const {return fPDGCharge;}
+  G4int GetPDGEncoding() const {return fPDGEncoding;}
+  G4ThreeVector GetInitialMomentum() const {return fInitialMomentum;}
+  G4ThreeVector GetFinalMomentum() const {return fFinalMomentum;}
+  G4ThreeVector GetInitialPosition() const {return fInitialPosition;}
+  G4ThreeVector GetFinalPosition() const {return fFinalPosition;}
 
-    //G4ThreeVector GetInitialMomentum() {return InitialMomentum;}
-    G4ThreeVector GetFinalMomentum() {return FinalMomentum;}
+  G4String GetInitialVolumeName() const {return fInitialVolumeName;}
+  G4String GetFinalVolumeName() const { return fFinalVolumeName;}
 
-    G4ThreeVector GetInitialPosition() {return InitialPosition;}
-    G4ThreeVector GetFinalPosition() {return FinalPosition;}
+  G4String GetInitialProcessName() const {return fInitialProcessName;}
+  G4String GetFinalProcessName() const {return fFinalProcessName;}
 
-    G4String GetFinalProcessName() {return FinalProcessName;}
-    G4String GetFinalVolumeName() {return FinalVolumeName;}
-    G4String GetInitialVolumeName() {return InitialVolumeName;}
-    G4String GetInitialProcessName() {return process;}
+  G4double GetTrackLength() const {return fTrackLength;}
 
-    void SetInitialPosition(G4ThreeVector vect) {InitialPosition = vect;}
-    void SetFinalPosition(G4ThreeVector vect) {FinalPosition = vect;}
+  /// Override pure virtual functions from G4VTrajectory
+  virtual const std::map<G4String,G4AttDef>* GetAttDefs() const
+  { return 0; }
+  virtual std::vector<G4AttValue>* CreateAttValues() const
+  { return 0; }
 
-    void SetFinalMomentum(G4ThreeVector vect) {FinalMomentum = vect;}
+  virtual void AppendStep(const G4Step* aStep);
+  virtual void MergeTrajectory(G4VTrajectory* secondTrajectory) {
+    (void)secondTrajectory;
+    return;
+  }
 
-    void SetFinalEnergy(G4float e) {FinalEnergy = e;}
+  /// Get the number of trajectory points saved with this trajectory.
+  virtual int GetPointEntries() const {return fPositionRecord->size();}
+  /// Get a particular trajectory point.
+  virtual G4VTrajectoryPoint* GetPoint(G4int i) const {
+    return (*fPositionRecord)[i];
+  }
 
-    void SetFinalProcessName(G4String s) {FinalProcessName = s;}
-    void SetFinalVolumeName(G4String s) {FinalVolumeName = s;}
-    void SetInitialVolumeName(G4String s) {InitialVolumeName = s;}
+private:
+  TrajectoryPointContainer* fPositionRecord;
+  G4int                     fTrackID;
+  G4int                     fParentID;
+  G4int                     fPDGEncoding;
+  G4double                  fPDGCharge;
 
-  private:
-    //G4int PDG;
+  // production
+  G4String                  fInitialProcessName;
+  G4ThreeVector             fInitialMomentum;
+  G4ThreeVector             fInitialPosition;
+  G4String                  fInitialVolumeName;
 
-    //G4float InitialEnergy;
-    G4float FinalEnergy;
+  // final
+  G4String                  fFinalProcessName;
+  G4ThreeVector             fFinalMomentum;
+  G4ThreeVector             fFinalPosition;
+  G4String                  fFinalVolumeName;
 
-    // parent ID
-    G4int ParentID;
+  G4double                  fTrackLength;
 
-    // parent PDG
-    G4String process;
 
-    //G4ThreeVector InitialMomentum;
-    G4ThreeVector FinalMomentum;
-
-    G4ThreeVector InitialPosition;
-    G4ThreeVector FinalPosition;
-
-    G4String FinalProcessName;
-
-    G4String InitialVolumeName;
-    G4String FinalVolumeName;
+  // end of the traj
 };
 
 extern G4ThreadLocal G4Allocator<T2K_Trajectory>* T2K_TrajectoryAllocator;
@@ -79,7 +95,7 @@ extern G4ThreadLocal G4Allocator<T2K_Trajectory>* T2K_TrajectoryAllocator;
 inline void* T2K_Trajectory::operator new(size_t)
 {
   if(!T2K_TrajectoryAllocator)
-      T2K_TrajectoryAllocator = new G4Allocator<T2K_Trajectory>;
+  T2K_TrajectoryAllocator = new G4Allocator<T2K_Trajectory>;
   return (void*)T2K_TrajectoryAllocator->MallocSingle();
 }
 

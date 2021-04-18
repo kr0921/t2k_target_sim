@@ -1,32 +1,3 @@
-//
-// ********************************************************************
-// * License and Disclaimer                                           *
-// *                                                                  *
-// * The  Geant4 software  is  copyright of the Copyright Holders  of *
-// * the Geant4 Collaboration.  It is provided  under  the terms  and *
-// * conditions of the Geant4 Software License,  included in the file *
-// * LICENSE and available at  http://cern.ch/geant4/license .  These *
-// * include a list of copyright holders.                             *
-// *                                                                  *
-// * Neither the authors of this software system, nor their employing *
-// * institutes,nor the agencies providing financial support for this *
-// * work  make  any representation or  warranty, express or implied, *
-// * regarding  this  software system or assume any liability for its *
-// * use.  Please see the license in the file  LICENSE  and URL above *
-// * for the full disclaimer and the limitation of liability.         *
-// *                                                                  *
-// * This  code  implementation is the result of  the  scientific and *
-// * technical work of the GEANT4 collaboration.                      *
-// * By using,  copying,  modifying or  distributing the software (or *
-// * any work based  on the software)  you  agree  to acknowledge its *
-// * use  in  resulting  scientific  publications,  and indicate your *
-// * acceptance of all terms of the Geant4 Software license.          *
-// ********************************************************************
-//
-//
-/// \file T2K_DetectorConstruction.cc
-/// \brief Implementation of the T2K_DetectorConstruction class
-
 #include "T2K_DetectorConstruction.hh"
 //#include "T2K_MagneticField.hh"
 
@@ -61,39 +32,35 @@
 #include "G4ios.hh"
 #include "G4SystemOfUnits.hh"
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+#include "G4MultiUnion.hh"
+#include "G4Transform3D.hh"
+#include "G4RotationMatrix.hh"
 
-//G4ThreadLocal T2K_MagneticField* T2K_DetectorConstruction::fMagneticField = 0;
-//G4ThreadLocal G4FieldManager* T2K_DetectorConstruction::fFieldMgr = 0;
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
+//******************************************************************************
 T2K_DetectorConstruction::T2K_DetectorConstruction()
   : G4VUserDetectorConstruction(),
   fVisAttributes(),
-  fCheckOverlaps(true)
-{
+  fCheckOverlaps(true) {
+//******************************************************************************
 
 }
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-T2K_DetectorConstruction::~T2K_DetectorConstruction()
-{
+//******************************************************************************
+T2K_DetectorConstruction::~T2K_DetectorConstruction() {
+//******************************************************************************
   for (auto visAttributes: fVisAttributes) {
     delete visAttributes;
   }
 }
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-G4VPhysicalVolume* T2K_DetectorConstruction::Construct()
-{
-
+//******************************************************************************
+G4VPhysicalVolume* T2K_DetectorConstruction::Construct() {
+//******************************************************************************
   ConstructMaterials();
 
   // Get materials
-  auto defaultMaterial  = G4Material::GetMaterial("G4_AIR");
+  auto defaultMaterial  = G4Material::GetMaterial("Vacuum");
   auto carbonMaterial   = G4Material::GetMaterial("Carbon");
   // Beryllium
   auto berylliumMaterial   = G4Material::GetMaterial("Beryllium");
@@ -101,6 +68,8 @@ G4VPhysicalVolume* T2K_DetectorConstruction::Construct()
   auto heliumMaterial  =  G4Material::GetMaterial("G4_He");
 
   auto ironMaterial = G4Material::GetMaterial("Iron");
+
+  auto sandMaterial = G4Material::GetMaterial("Ground");
 
   struct Experiment {
     G4double target_length;
@@ -228,58 +197,60 @@ G4VPhysicalVolume* T2K_DetectorConstruction::Construct()
         fCheckOverlaps);  // checking overlaps
 
 
+  auto sand = new G4Box("sand",           // its name
+                        worldSizeXY/2-10 * cm, worldSizeXY/2-10 * cm, worldSizeZ/2-10 * cm); // its size
   // Carbon buffle with a hole
 
-  auto baffle_box  = new G4Box("baffle", baffle_lengthX/2., baffle_lengthY/2., baffle_lengthZ/2.);
+  // auto baffle_box  = new G4Box("baffle", baffle_lengthX/2., baffle_lengthY/2., baffle_lengthZ/2.);
 
-  auto baffle_hole_cylinder
-    = new G4Tubs("hole",                          // its name
-        0.,
-        baffle_hole_diameter/2. + eps, baffle_lengthZ/2. + eps, // its size
-        0.0 * deg,  360.0 * deg);                   // its segment
-
-
-  auto baffle_with_hole = new G4SubtractionSolid("baffle_with_hole", baffle_box, baffle_hole_cylinder);
+  // auto baffle_hole_cylinder
+  //   = new G4Tubs("hole",                          // its name
+  //       0.,
+  //       baffle_hole_diameter/2. + eps, baffle_lengthZ/2. + eps, // its size
+  //       0.0 * deg,  360.0 * deg);                   // its segment
 
 
-  auto baffle_LV
-    = new G4LogicalVolume(
-        baffle_with_hole,      // its solid
-        carbonMaterial,  // its material
-        "BAFFLE");       // its name
+  // auto baffle_with_hole = new G4SubtractionSolid("baffle_with_hole", baffle_box, baffle_hole_cylinder);
 
-  new G4PVPlacement(
-      0,                 // no rotation
-      G4ThreeVector(0., 0., -(baffle_lengthZ/2. + baffle_target_distance)),  // at (0,0,h/2)
-      baffle_LV,         // its logical volume
-      "BAFFLE",          // its name
-      worldLV,           // its mother  volume
-      false,             // no boolean operation
-      0,                 // copy number
-      fCheckOverlaps);   // checking overlaps
 
-  // Helium cylinder
+  // auto baffle_LV
+  //   = new G4LogicalVolume(
+  //       baffle_with_hole,      // its solid
+  //       carbonMaterial,  // its material
+  //       "BAFFLE");       // its name
 
-  auto he_cylinder
-    = new G4Tubs("he_volume",                                // its name
-        0., he_diameter/2., he_length/2.,  // its size
-        0.0 * deg,  360.0 * deg);                // its segment
+  // new G4PVPlacement(
+  //     0,                 // no rotation
+  //     G4ThreeVector(0., 0., -(baffle_lengthZ/2. + baffle_target_distance)),  // at (0,0,h/2)
+  //     baffle_LV,         // its logical volume
+  //     "BAFFLE",          // its name
+  //     worldLV,           // its mother  volume
+  //     false,             // no boolean operation
+  //     0,                 // copy number
+  //     fCheckOverlaps);   // checking overlaps
 
-  auto he_LV
-    = new G4LogicalVolume(
-        he_cylinder,      // its solid
-        heliumMaterial,       // its material
-        "HE_VOLUME");            // its name
+  // // Helium cylinder
 
-  new G4PVPlacement(
-      0,                 // no rotation
-      G4ThreeVector(0., 0., -(he_length/2. + eps)),  // at (0,0,h/2)
-      he_LV,         // its logical volume
-      "HE_VOLUME",          // its name
-      worldLV,           // its mother  volume
-      false,             // no boolean operation
-      0,                 // copy number
-      fCheckOverlaps);   // checking overlaps
+  // auto he_cylinder
+  //   = new G4Tubs("he_volume",                                // its name
+  //       0., he_diameter/2., he_length/2.,  // its size
+  //       0.0 * deg,  360.0 * deg);                // its segment
+
+  // auto he_LV
+  //   = new G4LogicalVolume(
+  //       he_cylinder,      // its solid
+  //       heliumMaterial,       // its material
+  //       "HE_VOLUME");            // its name
+
+  // new G4PVPlacement(
+  //     0,                 // no rotation
+  //     G4ThreeVector(0., 0., -(he_length/2. + eps)),  // at (0,0,h/2)
+  //     he_LV,         // its logical volume
+  //     "HE_VOLUME",          // its name
+  //     worldLV,           // its mother  volume
+  //     false,             // no boolean operation
+  //     0,                 // copy number
+  //     fCheckOverlaps);   // checking overlaps
 
 
 
@@ -350,6 +321,44 @@ G4VPhysicalVolume* T2K_DetectorConstruction::Construct()
                     fCheckOverlaps
                     );
 
+  auto noSandUnion = new G4MultiUnion("no_sand");
+  G4RotationMatrix rot = G4RotationMatrix();
+  auto tr = G4Transform3D(rot, // rotation
+                          G4ThreeVector(0, 0, working_exp.target_length/2.) //position
+                          );
+
+  auto target_hall = new G4Box("target_hall",
+                               working_exp.decay_height/2.,
+                               working_exp.decay_width/2.,
+                               working_exp.target_length/2.
+                               );
+  noSandUnion->AddNode(*target_hall, tr);
+  tr = G4Transform3D(rot, // rotation
+                      G4ThreeVector(0, 0, working_exp.decay_length/2. + working_exp.target_length) //position
+                      );
+  noSandUnion->AddNode(*decay_volume, tr);
+    tr = G4Transform3D(rot, // rotation
+                      G4ThreeVector(0, 0, working_exp.beam_dump_length/2. + working_exp.decay_length + working_exp.target_length) //position
+                      );
+  noSandUnion->AddNode(*beam_dump, tr);
+  noSandUnion->Voxelize();
+  auto sand_subtr = new G4SubtractionSolid("sand_with_holes", sand, noSandUnion);
+  auto sand_LV
+    = new G4LogicalVolume(
+        sand_subtr,           // its solid
+        sandMaterial,  // its material
+        "SAND_VOLUME");         // its name
+
+  new G4PVPlacement(
+        0,                // no rotation
+        G4ThreeVector(),  // at (0,0,0)
+        sand_LV,          // its logical volume
+        "SAND_VOLUME",          // its name
+        worldLV,                // its mother  volume
+        false,            // no boolean operation
+        0,                // copy number
+        fCheckOverlaps);  // checking overlaps
+
   //
   // Visualization attributes
   //
@@ -359,35 +368,37 @@ G4VPhysicalVolume* T2K_DetectorConstruction::Construct()
   // visualization attributes ------------------------------------------------
 
 
-  auto visAttributesCarbon = new G4VisAttributes(G4Colour(0.9, 0.9, 0.9));   // LightGray
-
+  auto visAttributesCarbon = new G4VisAttributes(G4Colour(1., 1., 1.));   // white
   auto visAttributesHelium = new G4VisAttributes(G4Colour::Cyan());   // Cyan
+  auto visAttributesSand = new G4VisAttributes(G4Colour::Yellow());   // Yellow
+  auto visAttributesDecay = new G4VisAttributes(G4Colour(.5, .5, .5));   // gray
+  auto visAttributesBeamDump = new G4VisAttributes(G4Colour(.9, .9, .9));   // gray
 
   // Carbon
   target_LV->SetVisAttributes(visAttributesCarbon);
-  baffle_LV->SetVisAttributes(visAttributesCarbon);
+  // baffle_LV->SetVisAttributes(visAttributesCarbon);
 
-  // Helium
-  he_LV->SetVisAttributes(visAttributesHelium);
+  // // Helium
+  // he_LV->SetVisAttributes(visAttributesHelium);
+  dump_LV->SetVisAttributes(visAttributesBeamDump);
+  decay_LV->SetVisAttributes(visAttributesDecay);
+  sand_LV->SetVisAttributes(visAttributesSand);
 
 
   fVisAttributes.push_back(visAttributesCarbon);
   fVisAttributes.push_back(visAttributesHelium);
+  fVisAttributes.push_back(visAttributesSand);
+  fVisAttributes.push_back(visAttributesDecay);
+  fVisAttributes.push_back(visAttributesBeamDump);
 
   return worldPV;
 }
 
 
-void T2K_DetectorConstruction::ConstructMaterials()
-{
+//******************************************************************************
+void T2K_DetectorConstruction::ConstructMaterials() {
+//******************************************************************************
   auto nistManager = G4NistManager::Instance();
-
-  // Air
-  nistManager->FindOrBuildMaterial("G4_AIR");
-
-  // Helium
-  nistManager->FindOrBuildMaterial("G4_He");
-
 
   G4double a;  // mass of a mole;
   G4double z;  // z=mean number of protons;
@@ -395,11 +406,23 @@ void T2K_DetectorConstruction::ConstructMaterials()
   G4String symbol;
   G4int ncomp;
 
+  // Air
+  nistManager->FindOrBuildMaterial("G4_AIR");
+
+  new G4Material("Vacuum", z=1., a=1.01 * g / mole,
+                          density=1.e-25*gram/centimeter3);
+
+  // Helium
+  nistManager->FindOrBuildMaterial("G4_He");
+
   // Carbon
-  new G4Material("Carbon", z=6., a= 12.*g/mole, density= 1.8*g/cm3);
+  new G4Material("Carbon", z=6., a= 12.*g/mole, density=1.8*g/cm3);
 
   // Be
   new G4Material("Beryllium", z=4.,  a=9.012182*g/mole, density=1.8480*g/cm3);
+
+  // Ground
+  new G4Material("Ground", z=14.,  a=28.0855*g/mole, density=1.8*g/cm3);
 
   // Water
   auto d = 1.01*g/mole;
@@ -416,9 +439,5 @@ void T2K_DetectorConstruction::ConstructMaterials()
   density = 7.87 * g/cm3;
   a = 55.85 * g/mole;
   new G4Material("Iron", z=26., a, density);
-
-
-  // G4cout << G4endl << "The materials defined are : " << G4endl << G4endl;
-  // G4cout << *(G4Material::GetMaterialTable()) << G4endl;
 }
 

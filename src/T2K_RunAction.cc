@@ -36,90 +36,73 @@
 #include "G4UnitsTable.hh"
 #include "G4SystemOfUnits.hh"
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
+//******************************************************************************
 T2K_RunAction::T2K_RunAction()
- : G4UserRunAction()
-{
-  //G4RunManager::GetRunManager()->SetPrintProgress(1);
-  // Create analysis manager
-  // The choice of analysis technology is done via selectin of a namespace
-  // in T2K_Analysis.hh
+ : G4UserRunAction() {
+//******************************************************************************
   auto analysisManager = G4AnalysisManager::Instance();
   G4cout << "Using " << analysisManager->GetType() << G4endl;
 
-  // Default settings
-  //analysisManager->SetNtupleMerging(true);
-     // Note: merging ntuples is available only with Root output
-  //analysisManager->SetVerboseLevel(1);
   analysisManager->SetFileName("T2K_Sim");
 
   // Creating ntuple
   //
-  analysisManager->CreateNtuple("Particle_prod", "Particles production");
-  analysisManager->CreateNtupleDColumn("mom");    // N_id = 0   column Id = 0
-  analysisManager->CreateNtupleDColumn("pid");    // N_id = 0   column Id = 1
-  analysisManager->CreateNtupleDColumn("dir_x");  // N_id = 0   column Id = 2
-  analysisManager->CreateNtupleDColumn("dir_y");  // N_id = 0   column Id = 3
-  analysisManager->CreateNtupleDColumn("dir_z");  // N_id = 0   column Id = 4
-  analysisManager->CreateNtupleDColumn("pos_x");  // N_id = 0   column Id = 5
-  analysisManager->CreateNtupleDColumn("pos_y");  // N_id = 0   column Id = 6
-  analysisManager->CreateNtupleDColumn("pos_z");  // N_id = 0   column Id = 7
-  analysisManager->CreateNtupleDColumn("parent"); // N_id = 0   column Id = 8
-  analysisManager->CreateNtupleSColumn("process");// N_id = 0   column Id = 9
-  analysisManager->CreateNtupleDColumn("parent_pdg");// N_id = 0   column Id = 10
-  analysisManager->CreateNtupleSColumn("volume");  // N_id = 0   column Id = 11
+  analysisManager->CreateNtuple("Particle", "Particles information");
+  analysisManager->CreateNtupleDColumn("start_mom");      // N_id = 0   column Id = 0
+  analysisManager->CreateNtupleDColumn("end_mom");        // N_id = 0   column Id = 1
 
-  analysisManager->CreateNtuple("Particle_decay", "Particles decay");
-  analysisManager->CreateNtupleDColumn("mom");    // N_id = 1   column Id = 0
-  analysisManager->CreateNtupleDColumn("pid");    // N_id = 1   column Id = 1
-  analysisManager->CreateNtupleDColumn("dir_x");  // N_id = 1   column Id = 2
-  analysisManager->CreateNtupleDColumn("dir_y");  // N_id = 1   column Id = 3
-  analysisManager->CreateNtupleDColumn("dir_z");  // N_id = 1   column Id = 4
-  analysisManager->CreateNtupleDColumn("pos_x");  // N_id = 1   column Id = 5
-  analysisManager->CreateNtupleDColumn("pos_y");  // N_id = 1   column Id = 6
-  analysisManager->CreateNtupleDColumn("pos_z");  // N_id = 1   column Id = 7
-  analysisManager->CreateNtupleDColumn("parent"); // N_id = 1   column Id = 8
-  analysisManager->CreateNtupleSColumn("process");// N_id = 1   column Id = 9
-  analysisManager->CreateNtupleDColumn("parent_pdg");// N_id = 1   column Id = 10
-  analysisManager->CreateNtupleSColumn("volume");  // N_id = 1   column Id = 11
+  analysisManager->CreateNtupleDColumn("pid");            // N_id = 0   column Id = 2
+
+  analysisManager->CreateNtupleDColumn("start_dir_x");    // N_id = 0   column Id = 3
+  analysisManager->CreateNtupleDColumn("start_dir_y");    // N_id = 0   column Id = 4
+  analysisManager->CreateNtupleDColumn("start_dir_z");    // N_id = 0   column Id = 5
+  analysisManager->CreateNtupleDColumn("start_pos_x");    // N_id = 0   column Id = 6
+  analysisManager->CreateNtupleDColumn("start_pos_y");    // N_id = 0   column Id = 7
+  analysisManager->CreateNtupleDColumn("start_pos_z");    // N_id = 0   column Id = 8
+
+  analysisManager->CreateNtupleDColumn("end_dir_x");      // N_id = 0   column Id = 9
+  analysisManager->CreateNtupleDColumn("end_dir_y");      // N_id = 0   column Id = 10
+  analysisManager->CreateNtupleDColumn("end_dir_z");      // N_id = 0   column Id = 11
+  analysisManager->CreateNtupleDColumn("end_pos_x");      // N_id = 0   column Id = 12
+  analysisManager->CreateNtupleDColumn("end_pos_y");      // N_id = 0   column Id = 13
+  analysisManager->CreateNtupleDColumn("end_pos_z");      // N_id = 0   column Id = 14
+
+  analysisManager->CreateNtupleSColumn("start_process");  // N_id = 0   column Id = 15
+  analysisManager->CreateNtupleSColumn("end_process");    // N_id = 0   column Id = 16
+
+  analysisManager->CreateNtupleSColumn("start_volume");   // N_id = 0   column Id = 17
+  analysisManager->CreateNtupleSColumn("end_volume");     // N_id = 0   column Id = 18
+
+  analysisManager->CreateNtupleDColumn("track_length");   // N_id = 0   column Id = 19
+
+  analysisManager->CreateNtupleDColumn("parent_pid");     // N_id = 0   column Id = 20
+  analysisManager->CreateNtupleDColumn("parent_id");      // N_id = 0   column Id = 21
 
   analysisManager->FinishNtuple();
 }
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-T2K_RunAction::~T2K_RunAction()
-{
+//******************************************************************************
+T2K_RunAction::~T2K_RunAction() {
+//******************************************************************************
   delete G4AnalysisManager::Instance();
 }
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-void T2K_RunAction::BeginOfRunAction(const G4Run* /*run*/)
-{
-  //inform the runManager to save random number seed
-  //G4RunManager::GetRunManager()->SetRandomNumberStore(true);
+//******************************************************************************
+void T2K_RunAction::BeginOfRunAction(const G4Run* /*run*/) {
+//******************************************************************************
 
   // Get analysis manager
   auto analysisManager = G4AnalysisManager::Instance();
 
   // Open an output file
-  // The default file name is set in T2K_RunAction::T2K_RunAction(),
-  // it can be overwritten in a macro
   analysisManager->OpenFile();
 }
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-void T2K_RunAction::EndOfRunAction(const G4Run* /*run*/)
-{
-  // save histograms & ntuple
-  //
+//******************************************************************************
+void T2K_RunAction::EndOfRunAction(const G4Run* /*run*/) {
+//******************************************************************************
   auto analysisManager = G4AnalysisManager::Instance();
   analysisManager->Write();
   analysisManager->CloseFile();
 
 }
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
