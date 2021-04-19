@@ -3,7 +3,7 @@ image: bars21/dev_hep_geant:4.10.7.1gcc9
 build:
   stage: build
   before_script:
-    - source $COMMON_INSTALL_PREFIX/bin/geant.sh
+    - source $COMMON_INSTALL_PREFIX/bin/geant4.sh
   script:
     - mkdir build; cd build
     - cmake ../
@@ -16,6 +16,6 @@ build:
 Run_test:
   stage: test
   before_script:
-    - source $COMMON_INSTALL_PREFIX/bin/geant.sh
+    - source $COMMON_INSTALL_PREFIX/bin/geant4.sh
   script:
     - ./build/T2K_target_sim run.mac
