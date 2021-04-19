@@ -6,7 +6,7 @@ build:
     - source $COMMON_INSTALL_PREFIX/bin/geant4.sh
   script:
     - mkdir build; cd build
-    - cmake ../
+    - cmake3 ../
     - make -j3
   artifacts:
     paths:
