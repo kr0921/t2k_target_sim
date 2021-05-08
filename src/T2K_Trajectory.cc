@@ -47,6 +47,7 @@ T2K_Trajectory::T2K_Trajectory(const G4Track* aTrack) {
   fInitialPosition = aTrack->GetPosition();
   fInitialVolumeName = aTrack->GetVolume()->GetName();
   fParentID = aTrack->GetParentID();
+  fInitialMomentum = aTrack->GetMomentum();
 
 
   point->SetProcessName(fInitialProcessName);
@@ -56,9 +57,7 @@ T2K_Trajectory::T2K_Trajectory(const G4Track* aTrack) {
   fTrackID = aTrack->GetTrackID();
   fParentID = aTrack->GetParentID();
   fPDGEncoding = aTrack->GetParticleDefinition()->GetPDGEncoding();
-
-
-
+  fPDGCharge = aTrack->GetParticleDefinition()->GetPDGCharge();
 
 }
 

@@ -3,13 +3,14 @@
 G4Allocator<T2KTrajectoryPoint> aT2KTrajectoryPointAllocator;
 
 //******************************************************************************
-T2KTrajectoryPoint::T2KTrajectoryPoint(const G4Step* aStep) {
+T2KTrajectoryPoint::T2KTrajectoryPoint(const G4Step* aStep):
+G4TrajectoryPoint(aStep->GetPostStepPoint()->GetPosition()) {
 //******************************************************************************
   auto prePoint = aStep->GetPreStepPoint();
   if (prePoint)
     fMomentum = prePoint->GetMomentum();
 
-  auto postPoint = aStep->GetPostStepPoint();
+  // auto postPoint = aStep->GetPostStepPoint();
   // if (postPoint)
     // fPosition = aStep->GetPostStepPoint()->GetPosition();
 }
