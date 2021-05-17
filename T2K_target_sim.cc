@@ -58,8 +58,9 @@ int main(int argc,char** argv)
 
   // Construct the default run manager
   //
-  auto nThreads = 1;
+
 #ifdef G4MULTITHREADED
+  auto nThreads = 1;
   auto runManager = new G4MTRunManager;
   if ( nThreads > 0 ) {
     runManager->SetNumberOfThreads(nThreads);
@@ -81,8 +82,8 @@ int main(int argc,char** argv)
   runManager->Initialize();
 
   // Visualization manager construction
-  // auto visManager = new G4VisExecutive;
-  // visManager->Initialize();
+  auto visManager = new G4VisExecutive;
+  visManager->Initialize();
 
   // Get the pointer to the User Interface manager
   auto UImanager = G4UImanager::GetUIpointer();
@@ -108,7 +109,7 @@ int main(int argc,char** argv)
   // owned and deleted by the run manager, so they should not be deleted
   // in the main() program !
 
-  // delete visManager;
+  delete visManager;
   delete runManager;
 
   return 0;

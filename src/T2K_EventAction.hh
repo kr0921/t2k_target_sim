@@ -20,6 +20,7 @@ public:
     virtual void BeginOfEventAction(const G4Event*) {;};
     virtual void EndOfEventAction(const G4Event*);
     G4int GetTrajPIDById(const G4Event* event, const int id);
+    bool GetParentChargeed(const G4Event* event, const int id);
 
 };
 

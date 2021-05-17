@@ -77,6 +77,7 @@ T2K_RunAction::T2K_RunAction()
 
   analysisManager->CreateNtupleDColumn("parent_pid");     // N_id = 0   column Id = 20
   analysisManager->CreateNtupleDColumn("parent_id");      // N_id = 0   column Id = 21
+  analysisManager->CreateNtupleDColumn("event");          // N_id = 0   column Id = 22
 
   analysisManager->FinishNtuple();
 }

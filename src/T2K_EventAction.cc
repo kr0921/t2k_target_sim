@@ -50,6 +50,35 @@ G4int T2K_EventAction::GetTrajPIDById(const G4Event* event, const int id) {
 }
 
 //******************************************************************************
+bool T2K_EventAction::GetParentChargeed(const G4Event* event, const int id) {
+//******************************************************************************
+  auto TrajCont = event->GetTrajectoryContainer();
+
+  if (!TrajCont)
+    return true;
+
+  for (uint trajID = 0; trajID < TrajCont->entries(); ++trajID) {
+    auto traj = (T2K_Trajectory*)(*TrajCont)[trajID];
+    if (!traj)
+      continue;
+    // found parent
+    if (traj->GetTrackID() == id) {
+      if (traj->GetCharge() != 0)
+        return true;
+      else {
+        auto parent = traj->GetParentID();
+        // stop recursion at primary
+        if (traj->GetTrackID() == 1)
+          return false;
+        return GetParentChargeed(event, parent);
+      }
+    }
+  }
+  return false;
+
+}
+
+//******************************************************************************
 void T2K_EventAction::EndOfEventAction(const G4Event* event) {
 //******************************************************************************
   //
@@ -84,6 +113,13 @@ void T2K_EventAction::EndOfEventAction(const G4Event* event) {
     else
       MomDirEnd = G4ThreeVector(0., 0., 0.);
 
+    auto parent = traj->GetParentID();
+
+    // WARNING v11 specific
+    // if (traj->GetInitialVolumeName() != "TARGET" &&\
+    //     GetParentChargeed(event, parent))
+    //   continue;
+
     analysisManager->FillNtupleDColumn(0, 0, traj->GetInitialMomentum().mag());
 
     analysisManager->FillNtupleDColumn(0, 3, MomDir.x());
@@ -112,29 +148,15 @@ void T2K_EventAction::EndOfEventAction(const G4Event* event) {
     analysisManager->FillNtupleDColumn(0, 13, endPos.y());
     analysisManager->FillNtupleDColumn(0, 14, endPos.z());
 
-    auto parent = traj->GetParentID();
     analysisManager->FillNtupleDColumn(0, 21, parent);
     auto parent_pid = GetTrajPIDById(event, parent);
     analysisManager->FillNtupleDColumn(0, 20, parent_pid);
+
+    analysisManager->FillNtupleDColumn(0, 22, event->GetEventID());
 
     analysisManager->FillNtupleDColumn(0, 19, traj->GetTrackLength());
 
 
     analysisManager->AddNtupleRow(0);
-
-
-
-
-    // std::cout << "Traj #" << trajID << std::endl;
-    // std::cout << "pid = \t" << traj->GetPDGEncoding() << std::endl;
-    // std::cout << "Npoints: " << traj->GetPointEntries() << std::endl;
-    // for (auto pId = 0; pId < traj->GetPointEntries(); ++pId) {
-    //   auto point = dynamic_cast<T2KTrajectoryPoint*>(traj->GetPoint(pId));
-    //   if (!point)
-    //     continue;
-
-    //   std::cout << "point " << pId << " at z " << point->GetPosition().z() << "\t" << point->GetMomentum().z() << std::endl;
-    //   std::cout << "process\t" << point->GetProcessName() << "\tvol\t" << point->GetVolumeName() << std::endl;
-    // }
   } // traj loop
 }
