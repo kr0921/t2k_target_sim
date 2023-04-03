@@ -62,6 +62,7 @@ G4VPhysicalVolume* T2K_DetectorConstruction::Construct() {
   // Get materials
   auto defaultMaterial  = G4Material::GetMaterial("Vacuum");
   auto carbonMaterial   = G4Material::GetMaterial("Carbon");
+  //auto carbonMaterial   = new G4Material("Carbon", 6., 12.01*g/mole, 1.8*g/cm3);
   // Beryllium
   auto berylliumMaterial   = G4Material::GetMaterial("Beryllium");
   // G4Material* berylliumMaterial = G4Material::GetMaterial("Beryllium");
@@ -121,14 +122,15 @@ G4VPhysicalVolume* T2K_DetectorConstruction::Construct() {
   PS191.target_material = berylliumMaterial;
 
 
-  Experiment working_exp = PS191;
+//SI  Experiment working_exp = PS191;
+  Experiment working_exp = T2K;
 
   // Eps
   G4double eps = 0.001;
 
   // Geometry parameters
-  auto  worldSizeXY = 25 * m;
-  auto  worldSizeZ  = 300 * m;
+  auto  worldSizeXY = 20.0*cm; //25 * m;
+  auto  worldSizeZ  = 200.0*cm; //300 * m;
 
   // Target
   // G4double target_length  = 800.;
@@ -197,8 +199,8 @@ G4VPhysicalVolume* T2K_DetectorConstruction::Construct() {
         fCheckOverlaps);  // checking overlaps
 
 
-  auto sand = new G4Box("sand",           // its name
-                        worldSizeXY/2-10 * cm, worldSizeXY/2-10 * cm, worldSizeZ/2-10 * cm); // its size
+//SI  auto sand = new G4Box("sand",           // its name
+//SI                        worldSizeXY/2-10 * cm, worldSizeXY/2-10 * cm, worldSizeZ/2-10 * cm); // its size
   // Carbon buffle with a hole
 
   // auto baffle_box  = new G4Box("baffle", baffle_lengthX/2., baffle_lengthY/2., baffle_lengthZ/2.);
@@ -277,7 +279,7 @@ G4VPhysicalVolume* T2K_DetectorConstruction::Construct() {
       0,                 // copy number
       fCheckOverlaps);   // checking overlaps
 
-  // Decay volume
+/*SI  // Decay volume
   auto decay_volume = new G4Box("decay_volume",
                                 working_exp.decay_height/2.,
                                 working_exp.decay_width/2.,
@@ -298,7 +300,8 @@ G4VPhysicalVolume* T2K_DetectorConstruction::Construct() {
                   0,
                   fCheckOverlaps
                   );
-
+SI*/                
+/*SI
   // Beam Dump
   auto beam_dump = new G4Box("beam_dump",
                              working_exp.beam_dump_height/2.,
@@ -320,7 +323,7 @@ G4VPhysicalVolume* T2K_DetectorConstruction::Construct() {
                     0,
                     fCheckOverlaps
                     );
-
+*/ /*SI
   auto noSandUnion = new G4MultiUnion("no_sand");
   G4RotationMatrix rot = G4RotationMatrix();
   auto tr = G4Transform3D(rot, // rotation
@@ -341,8 +344,9 @@ G4VPhysicalVolume* T2K_DetectorConstruction::Construct() {
                       G4ThreeVector(0, 0, working_exp.beam_dump_length/2. + working_exp.decay_length + working_exp.target_length) //position
                       );
   noSandUnion->AddNode(*beam_dump, tr);
-  noSandUnion->Voxelize();
-  auto sand_subtr = new G4SubtractionSolid("sand_with_holes", sand, noSandUnion);
+SI*/
+//SI  noSandUnion->Voxelize();
+/*SI  auto sand_subtr = new G4SubtractionSolid("sand_with_holes", sand, noSandUnion);
   auto sand_LV
     = new G4LogicalVolume(
         sand_subtr,           // its solid
@@ -358,7 +362,7 @@ G4VPhysicalVolume* T2K_DetectorConstruction::Construct() {
         false,            // no boolean operation
         0,                // copy number
         fCheckOverlaps);  // checking overlaps
-
+SI*/
   //
   // Visualization attributes
   //
@@ -380,9 +384,9 @@ G4VPhysicalVolume* T2K_DetectorConstruction::Construct() {
 
   // // Helium
   // he_LV->SetVisAttributes(visAttributesHelium);
-  dump_LV->SetVisAttributes(visAttributesBeamDump);
-  decay_LV->SetVisAttributes(visAttributesDecay);
-  sand_LV->SetVisAttributes(visAttributesSand);
+//SI  dump_LV->SetVisAttributes(visAttributesBeamDump);
+//SI  decay_LV->SetVisAttributes(visAttributesDecay);
+//SI  sand_LV->SetVisAttributes(visAttributesSand);
 
 
   fVisAttributes.push_back(visAttributesCarbon);

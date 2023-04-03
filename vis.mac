@@ -86,11 +86,11 @@
 
 /T2K/generator/T2KGenerator FALSE
 
-/T2K/generator/momentum 1000
+#/T2K/generator/momentum 1000
 
-/T2K/generator/randomizePrimary FALSE
-/T2K/generator/sigmaMomentum 0.
-/T2K/generator/sigmaAngle 0.
+#/T2K/generator/randomizePrimary FALSE
+#/T2K/generator/sigmaMomentum 0.
+#/T2K/generator/sigmaAngle 0.
 /run/verbose 1
 /run/printProgress 1
 

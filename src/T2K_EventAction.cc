@@ -98,7 +98,29 @@ void T2K_EventAction::EndOfEventAction(const G4Event* event) {
     // skip photons/ e+-/ neutrons / protons
     if (pid == 22 || abs(pid) == 11 || pid > 100000 || pid == 2112 || pid == 2212)
       continue;
+    
+    //SI stuff
+    //if ( !(pid==111 || pid==211 || pid==-211) ) continue; //want Pi0/+/- only
+    //if ( !(pid==111 || pid==221) ) continue; //want Pi0/+/- and eta only
+    
+    //if ( pid!=221 ) continue; //eta only
+    //auto p_mom = traj->GetInitialMomentum().mag();
+    ////if(p_mom>5000.0) continue;
+    ////if( !(p_mom>5000.0 && p_mom<=10000.0) ) continue;
+    ////if( !(p_mom>10000.0 && p_mom<=15000.0) ) continue;
+    ////if( !(p_mom>15000.0 && p_mom<=20000.0) ) continue;
+    //if(p_mom<15000.0) continue;
 
+    if ( !(pid==113 || pid==223) ) continue; //ro0 or omega only
+    auto p_mom = traj->GetInitialMomentum().mag();
+    //if(p_mom>5000.0) continue;
+    //if( !(p_mom>5000.0 && p_mom<=10000.0) ) continue;
+    //if( !(p_mom>10000.0 && p_mom<=15000.0) ) continue;
+    if(p_mom<15000.0) continue;
+   
+    
+    
+    
     analysisManager->FillNtupleDColumn(0, 2, pid);
 
     auto MomDir = traj->GetInitialMomentum();
@@ -116,9 +138,9 @@ void T2K_EventAction::EndOfEventAction(const G4Event* event) {
     auto parent = traj->GetParentID();
 
     // WARNING v11 specific
-    // if (traj->GetInitialVolumeName() != "TARGET" &&\
-    //     GetParentChargeed(event, parent))
-    //   continue;
+     if (traj->GetInitialVolumeName() != "TARGET" &&\
+         GetParentChargeed(event, parent))
+       continue;
 
     analysisManager->FillNtupleDColumn(0, 0, traj->GetInitialMomentum().mag());
 

@@ -27,8 +27,8 @@
 /// \file exampleB5.cc
 /// \brief Main program of the analysis/B5 example
 
-#include "T2K_DetectorConstruction.hh"
-#include "T2K_ActionInitialization.hh"
+#include "src/T2K_DetectorConstruction.hh"
+#include "src/T2K_ActionInitialization.hh"
 
 #ifdef G4MULTITHREADED
 #include "G4MTRunManager.hh"
@@ -59,15 +59,15 @@ int main(int argc,char** argv)
   // Construct the default run manager
   //
 
-#ifdef G4MULTITHREADED
-  auto nThreads = 1;
-  auto runManager = new G4MTRunManager;
-  if ( nThreads > 0 ) {
-    runManager->SetNumberOfThreads(nThreads);
-  }
-#else
+// #ifdef G4MULTITHREADED
+//   auto nThreads = 1;
+//   auto runManager = new G4MTRunManager;
+//   if ( nThreads > 0 ) {
+//     runManager->SetNumberOfThreads(nThreads);
+//   }
+// #else
   auto runManager = new G4RunManager;
-#endif
+// #endif
 
   // Mandatory user initialization classes
   runManager->SetUserInitialization(new T2K_DetectorConstruction);

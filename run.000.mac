@@ -29,9 +29,9 @@
 /T2K/generator/AngleX       -0.066   mrad
 /T2K/generator/AngleY        0.027   mrad
 /run/verbose 1
-/run/printProgress 1000
+/run/printProgress 10000
 
 /analysis/setFileName T2K_target_sim
-/run/beamOn 50000
+/run/beamOn 200000
 
 
